@@ -25,6 +25,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     
     <style>
         :root {
@@ -686,6 +687,249 @@
             right: 20px;
         }
 
+        /* ------------------------------------------------------------------ */
+        /* تصميم مشغل الفيديو الاحترافي المخصص - نجم الشاشات */
+        /* ------------------------------------------------------------------ */
+        .player-modal {
+            position: fixed;
+            inset: 0;
+            background: #000000;
+            z-index: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+
+        .player-modal.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .video-container {
+            position: relative;
+            width: 100%;
+            max-width: 960px;
+            aspect-ratio: 16/9;
+            background: #000;
+            overflow: hidden;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.8);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+        }
+
+        /* عندما يتم تفعيل ملء الشاشة الكاملة للموقع أو المشغل */
+        .video-container:fullscreen, .video-container:-webkit-full-screen {
+            max-width: 100% !important;
+            width: 100% !important;
+            height: 100% !important;
+            aspect-ratio: auto;
+            border-radius: 0;
+            border: none;
+        }
+
+        .video-container video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        /* جعل الفيديو يتمدد بالكامل ويلغي السواد والخطوط الجانبية عند تفعيل الشاشة الكاملة */
+        .video-container:fullscreen video, .video-container:-webkit-full-screen video {
+            object-fit: fill !important;
+        }
+
+        /* لوحة التحكم الذكية بمشغل الفيديو */
+        .video-controls {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(11, 15, 25, 0.95));
+            padding: 20px 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 10;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .video-container.show-controls .video-controls {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* شريط تقدم الفيديو المباشر */
+        .video-progress-container {
+            width: 100%;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .video-progress-bar {
+            height: 100%;
+            width: 0%;
+            background: var(--accent-linear);
+            border-radius: 10px;
+            position: relative;
+        }
+
+        .video-control-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            position: relative;
+        }
+
+        .player-btn {
+            background: transparent;
+            border: none;
+            color: #ffffff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s, color 0.2s;
+        }
+
+        .player-btn:hover {
+            color: #FFCC00;
+            transform: scale(1.1);
+        }
+
+        .player-btn i {
+            width: 24px;
+            height: 24px;
+        }
+
+        /* التحكم الذكي بالصوت */
+        .volume-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .volume-slider {
+            width: 70px;
+            height: 4px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #FFCC00;
+            cursor: pointer;
+        }
+
+        /* علامة الجودة HD للموقع */
+        .hd-badge {
+            font-size: 11px;
+            font-weight: 800;
+            color: #0b0f19;
+            background: #FFCC00;
+            padding: 3px 6px;
+            border-radius: 4px;
+            letter-spacing: 0.5px;
+        }
+
+        /* تصميم قائمة اختيار السيرفرات المخصصة */
+        .servers-menu {
+            position: absolute;
+            bottom: 45px;
+            left: 50%;
+            transform: translateX(-50%) translateY(10px);
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 6px;
+            display: none;
+            flex-direction: column;
+            gap: 4px;
+            min-width: 140px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            z-index: 100;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .servers-menu.show {
+            display: flex;
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .server-option {
+            padding: 8px 12px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #ffffff;
+            background: transparent;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .server-option:hover, .server-option.active {
+            background: var(--accent-linear);
+            color: #030712;
+        }
+
+        /* لودر التحميل الخاص بالفيديو */
+        .player-loader {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            z-index: 5;
+        }
+
+        .player-loader .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255,255,255,0.05);
+            border-top-color: #FFCC00;
+            border-radius: 50%;
+            animation: spin 1s infinite linear;
+        }
+
+        @media (max-width: 768px) {
+            .video-container {
+                border-radius: 0;
+                border: none;
+            }
+        }
+
         @media (min-width: 768px) {
             .slide-content { width: 94%; max-width: 540px; margin-top: -20px; }
             .team img { width: 85px; height: 85px; }
@@ -797,6 +1041,60 @@
         <i data-lucide="x" style="color: var(--text-muted); cursor: pointer; width: 18px;" onclick="toggleSearchBar()"></i>
     </div>
 
+    <div class="player-modal" id="customPlayerModal">
+        <div class="video-container" id="videoContainerBox">
+            <div class="player-loader" id="playerLoader">
+                <div class="spinner"></div>
+            </div>
+            
+            <video id="mainVideoPlayer" playsinline></video>
+
+            <div class="video-controls">
+                <div class="video-progress-container" onclick="seekVideo(event)">
+                    <div class="video-progress-bar" id="videoProgressBar"></div>
+                </div>
+                <div class="video-control-row">
+                    <div class="control-group">
+                        <button class="player-btn" onclick="togglePlayPause()" id="playPauseBtn">
+                            <i data-lucide="play"></i>
+                        </button>
+                        <button class="player-btn" onclick="skipTime(-10)">
+                            <i data-lucide="rewind"></i>
+                        </button>
+                        <button class="player-btn" onclick="skipTime(10)">
+                            <i data-lucide="fast-forward"></i>
+                        </button>
+                        <div class="volume-container">
+                            <button class="player-btn" onclick="toggleMute()" id="volumeBtn">
+                                <i data-lucide="volume-2"></i>
+                            </button>
+                            <input type="range" class="volume-slider" min="0" max="1" step="0.1" value="1" id="volumeSlider" oninput="setVideoVolume(this.value)">
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <span class="hd-badge">HD</span>
+                        
+                        <button class="player-btn" onclick="toggleServersMenu(event)" id="serverToggleBtn" title="اختر السيرفر والجودة">
+                            <i data-lucide="server"></i>
+                        </button>
+                        <div class="servers-menu" id="serversMenuBox">
+                            <button class="server-option active" onclick="changeServer(1)">سيرفر 1 (1080p)</button>
+                            <button class="server-option" onclick="changeServer(2)">سيرفر 2 (720p)</button>
+                            <button class="server-option" onclick="changeServer(3)">سيرفر 3 (360p)</button>
+                        </div>
+
+                        <button class="player-btn" onclick="togglePlayerFullscreen()" id="fullscreenBtn" title="تكبير الشاشة والتدوير الأفقي">
+                            <i data-lucide="expand"></i>
+                        </button>
+                        <button class="player-btn" onclick="closeCustomPlayer()" title="العودة للموقع" style="color: #EF4444;">
+                            <i data-lucide="log-out"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="hero-slider">
         <button class="slider-nav-btn prev" onclick="moveSlide(1)"><i data-lucide="chevron-right"></i></button>
         <button class="slider-nav-btn next" onclick="moveSlide(-1)"><i data-lucide="chevron-left"></i></button>
@@ -816,8 +1114,16 @@
         let scoreHistoryTracker = {}; 
         let countdownIntervals = []; 
         let currentLang = 'ar'; 
+        let controlsTimeout;
 
-        const STREAM_LINK = "https://live-aburayhan1107.telewebion.ir/ek/faratar/live/108050p/index.m3u8";
+        // مصفوفة السيرفرات الثلاثة التي قمت بتزويدي بها
+        const SERVERS_LIST = {
+            1: "http://lookprotvappfree.mytunnel.org:8080/memfs/e1dbc72b-e5cb-4a87-bdc2-3fe989da615e.m3u8",
+            2: "https://stm.linkip.org/live/1956_.m3u8",
+            3: "https://stm.linkip.org/live/1965_.m3u8"
+        };
+        let activeServerId = 1;
+
         const FORMSPREE_URL = "https://formspree.io/f/xvzjzzyk"; 
 
         const teamTranslationDictionary = {
@@ -867,7 +1173,7 @@
                 alertSuspended: "المباراة متوقفة حالياً من قبل الحكم أو المصدر، سيتم استئناف البث فور عودة اللعب.",
                 alertUpcoming: "المباراة لم تبدأ بعد! يرجى الانتظار حتى موعد انطلاق الاستوديو التحليلي وبداية البث المباشر.",
                 alertEmptyReport: "يرجى كتابة تفاصيل المشكلة أولاً قبل الإرسال.",
-                alertErrorReport: "حدث خطأ أثناء الإرسال، يرجى المحاولة لاحقاً.",
+                alertErrorReport: "حدث خطأ أثناء الإرسال, يرجى المحاولة لاحقاً.",
                 remaining: "باقي: ", hours: "ساعة", minutes: "دقيقة", seconds: "ثانية",
                 privacyHTML: `
                     <p>مرحباً بك في موقع <strong>نجم الشاشات</strong>. نحن نولي أقصى درجات الأهمية لخصوصية زوارنا ومستخدمينا. توضح هذه السياسة البيانات التي نجمعها وكيفية التعامل معها.</p>
@@ -1054,7 +1360,7 @@
 
         function handleMatchButtonClick(state) {
             if (state === "in" || state === "live") {
-                window.open(STREAM_LINK, '_blank');
+                openCustomPlayer(SERVERS_LIST[activeServerId]);
             } else if (state === "suspended") {
                 alert(translations[currentLang].alertSuspended);
             } else if (state === "post" || state === "ended") {
@@ -1063,6 +1369,203 @@
                 alert(translations[currentLang].alertUpcoming);
             }
         }
+
+        /* ------------------------------------------------------------------ */
+        /* العمليات البرمجية للمشغل الذكي الجديد */
+        /* ------------------------------------------------------------------ */
+        const video = document.getElementById('mainVideoPlayer');
+        const videoContainer = document.getElementById('videoContainerBox');
+        const playerModal = document.getElementById('customPlayerModal');
+        const playPauseIcon = document.getElementById('playPauseBtn');
+        const volumeIcon = document.getElementById('volumeBtn');
+        const playerLoader = document.getElementById('playerLoader');
+        const progressBar = document.getElementById('videoProgressBar');
+        let hlsInstance = null;
+
+        function openCustomPlayer(streamUrl) {
+            playerModal.classList.add('open');
+            playerLoader.style.display = 'flex';
+            resetControlsTimeout();
+
+            if (Hls.isSupported()) {
+                if (hlsInstance) { hlsInstance.destroy(); }
+                hlsInstance = new Hls();
+                hlsInstance.loadSource(streamUrl);
+                hlsInstance.attachMedia(video);
+                hlsInstance.on(Hls.Events.MANIFEST_PARSED, function() {
+                    video.play();
+                });
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                video.src = streamUrl;
+                video.addEventListener('loadedmetadata', function() {
+                    video.play();
+                });
+            }
+
+            videoContainer.addEventListener('mousemove', showControlsTemporarily);
+            videoContainer.addEventListener('click', showControlsTemporarily);
+            videoContainer.addEventListener('touchstart', showControlsTemporarily);
+        }
+
+        function closeCustomPlayer() {
+            video.pause();
+            if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; }
+            video.src = "";
+            if (document.fullscreenElement) { document.exitFullscreen(); }
+            playerModal.classList.remove('open');
+            document.getElementById('serversMenuBox').classList.remove('show');
+            clearTimeout(controlsTimeout);
+        }
+
+        function togglePlayPause() {
+            if (video.paused) {
+                video.play();
+                playPauseIcon.innerHTML = '<i data-lucide="pause"></i>';
+            } else {
+                video.pause();
+                playPauseIcon.innerHTML = '<i data-lucide="play"></i>';
+            }
+            lucide.createIcons({ attrs: { 'data-lucide': true }, nameAttr: 'data-lucide', root: playPauseIcon });
+            resetControlsTimeout();
+        }
+
+        video.addEventListener('play', () => {
+            playPauseIcon.innerHTML = '<i data-lucide="pause"></i>';
+            lucide.createIcons({ attrs: { 'data-lucide': true }, nameAttr: 'data-lucide', root: playPauseIcon });
+        });
+
+        video.addEventListener('pause', () => {
+            playPauseIcon.innerHTML = '<i data-lucide="play"></i>';
+            lucide.createIcons({ attrs: { 'data-lucide': true }, nameAttr: 'data-lucide', root: playPauseIcon });
+        });
+
+        video.addEventListener('waiting', () => { playerLoader.style.display = 'flex'; });
+        video.addEventListener('playing', () => { playerLoader.style.display = 'none'; });
+
+        video.addEventListener('timeupdate', () => {
+            if (video.duration) {
+                const percentage = (video.currentTime / video.duration) * 100;
+                progressBar.style.width = percentage + '%';
+            } else {
+                progressBar.style.width = '100%'; 
+            }
+        });
+
+        function seekVideo(event) {
+            const rect = event.target.getBoundingClientRect();
+            const pos = (event.clientX - rect.left) / rect.width;
+            if(video.duration) { video.currentTime = pos * video.duration; }
+        }
+
+        function skipTime(amount) {
+            video.currentTime += amount;
+            resetControlsTimeout();
+        }
+
+        function setVideoVolume(val) {
+            video.volume = val;
+            if (val == 0) {
+                volumeIcon.innerHTML = '<i data-lucide="volume-x"></i>';
+            } else if (val < 0.5) {
+                volumeIcon.innerHTML = '<i data-lucide="volume-1"></i>';
+            } else {
+                volumeIcon.innerHTML = '<i data-lucide="volume-2"></i>';
+            }
+            lucide.createIcons({ attrs: { 'data-lucide': true }, nameAttr: 'data-lucide', root: volumeIcon });
+        }
+
+        function toggleMute() {
+            video.muted = !video.muted;
+            const slider = document.getElementById('volumeSlider');
+            if (video.muted) {
+                volumeIcon.innerHTML = '<i data-lucide="volume-x"></i>';
+                slider.value = 0;
+            } else {
+                volumeIcon.innerHTML = '<i data-lucide="volume-2"></i>';
+                slider.value = video.volume;
+            }
+            lucide.createIcons({ attrs: { 'data-lucide': true }, nameAttr: 'data-lucide', root: volumeIcon });
+            resetControlsTimeout();
+        }
+
+        function togglePlayerFullscreen() {
+            if (!document.fullscreenElement) {
+                if (videoContainer.requestFullscreen) {
+                    videoContainer.requestFullscreen();
+                } else if (videoContainer.webkitRequestFullscreen) {
+                    videoContainer.webkitRequestFullscreen();
+                }
+                
+                if (screen.orientation && screen.orientation.lock) {
+                    screen.orientation.lock('landscape').catch(err => console.log("Orientation lock not supported"));
+                }
+            } else {
+                document.exitFullscreen();
+                if (screen.orientation && screen.orientation.unlock) {
+                    screen.orientation.unlock();
+                }
+            }
+            resetControlsTimeout();
+        }
+
+        /* دوال إدارة وتغيير السيرفرات داخل المشغل */
+        function toggleServersMenu(event) {
+            event.stopPropagation();
+            document.getElementById('serversMenuBox').classList.toggle('show');
+            resetControlsTimeout();
+        }
+
+        function changeServer(serverId) {
+            if (serverId === activeServerId) return;
+            activeServerId = serverId;
+            
+            // تحديث الشكل النشط في القائمة
+            const options = document.querySelectorAll('.server-option');
+            options.forEach((opt, idx) => {
+                if (idx === (serverId - 1)) opt.classList.add('active');
+                else opt.classList.remove('active');
+            });
+            
+            document.getElementById('serversMenuBox').classList.remove('show');
+            playerLoader.style.display = 'flex';
+
+            // إعادة ربط البث بالسيرفر الجديد فوراً دون إغلاق الشاشة
+            const newUrl = SERVERS_LIST[serverId];
+            if (Hls.isSupported()) {
+                if (hlsInstance) { hlsInstance.destroy(); }
+                hlsInstance = new Hls();
+                hlsInstance.loadSource(newUrl);
+                hlsInstance.attachMedia(video);
+                hlsInstance.on(Hls.Events.MANIFEST_PARSED, function() {
+                    video.play();
+                });
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                video.src = newUrl;
+                video.play();
+            }
+            resetControlsTimeout();
+        }
+
+        function showControlsTemporarily() {
+            videoContainer.classList.add('show-controls');
+            resetControlsTimeout();
+        }
+
+        function resetControlsTimeout() {
+            clearTimeout(controlsTimeout);
+            controlsTimeout = setTimeout(() => {
+                if (!video.paused && !document.getElementById('serversMenuBox').classList.contains('show')) {
+                    videoContainer.classList.remove('show-controls');
+                }
+            }, 3000); 
+        }
+
+        // إغلاق قائمة السيرفرات عند النقر في أي مكان آخر داخل المشغل
+        document.addEventListener('click', function() {
+            document.getElementById('serversMenuBox').classList.remove('show');
+        });
+
+        /* ------------------------------------------------------------------ */
 
         function getLocalizedTime(utcString) {
             return new Date(utcString).toLocaleTimeString(currentLang === 'ar' ? 'ar-EG' : 'en-US', { timeZone: 'Asia/Riyadh', hour: '2-digit', minute: '2-digit', hour12: true });
@@ -1242,9 +1745,12 @@
                         const btnEl = existingSlide.querySelector('.btn-subscribe');
                         btnEl.className = `btn-subscribe ${customButtonClass}`;
                         btnEl.innerText = buttonDynamicText;
-                        btnEl.setAttribute('onclick', `handleMatchButtonClick('${state}')`);
                         
-                        existingSlide.querySelector('.badge-container id[id^="count-box-"]').id = countdownContainerId;
+                        // تصحيح: تمرير دالة مجهولة لمنع مشاكل الاقتباسات وحالة الشرط أثناء التحديث التلقائي
+                        btnEl.onclick = function() { handleMatchButtonClick(state); };
+                        
+                        const countBox = existingSlide.querySelector('.badge-container div[id^="count-box-"]');
+                        if (countBox) countBox.id = countdownContainerId;
                     } else {
                         const slideDiv = document.createElement('div');
                         slideDiv.className = `slide ${index === currentSlide ? 'active' : ''}`;
@@ -1271,9 +1777,11 @@
                                         <div id="${countdownContainerId}"></div>
                                     </div>
                                 </div>
-                                <button class="btn-subscribe ${customButtonClass}" onclick="handleMatchButtonClick('${state}')">${buttonDynamicText}</button>
+                                <button class="btn-subscribe ${customButtonClass}">${buttonDynamicText}</button>
                             </div>
                         `;
+                        // ربط الحدث برمجياً بشكل مستقل وآمن تماماً
+                        slideDiv.querySelector('.btn-subscribe').onclick = function() { handleMatchButtonClick(state); };
                         wrapper.appendChild(slideDiv);
                     }
 
