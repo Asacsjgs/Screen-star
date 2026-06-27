@@ -1116,7 +1116,6 @@
         let currentLang = 'ar'; 
         let controlsTimeout;
 
-        // مصفوفة السيرفرات الثلاثة التي قمت بتزويدي بها
         const SERVERS_LIST = {
             1: "http://lookprotvappfree.mytunnel.org:8080/memfs/e1dbc72b-e5cb-4a87-bdc2-3fe989da615e.m3u8",
             2: "https://stm.linkip.org/live/1956_.m3u8",
@@ -1371,7 +1370,7 @@
         }
 
         /* ------------------------------------------------------------------ */
-        /* العمليات البرمجية للمشغل الذكي الجديد والمعدل */
+        /* التعديل البرمجي الذكي لدعم جميع أنواع روابط وصيغ الـ IPTV والبث */
         /* ------------------------------------------------------------------ */
         const video = document.getElementById('mainVideoPlayer');
         const videoContainer = document.getElementById('videoContainerBox');
@@ -1382,75 +1381,65 @@
         const progressBar = document.getElementById('videoProgressBar');
         let hlsInstance = null;
 
-        function initHlsCore(streamUrl) {
+        function openCustomPlayer(streamUrl) {
+            playerModal.classList.add('open');
             playerLoader.style.display = 'flex';
+            resetControlsTimeout();
+
+            // إعدادات احترافية متقدمة لضمان تخطي حماية المتصفحات وتشغيل السيرفرات بشكل مستقر
+            const hlsConfig = {
+                enableWorker: true,
+                lowLatencyMode: true,
+                backBufferLength: 90,
+                overrideNative: true,
+                maxBufferLength: 30,
+                maxMaxBufferLength: 600
+            };
 
             if (Hls.isSupported()) {
                 if (hlsInstance) { hlsInstance.destroy(); }
-                
-                // إضافة معايير ذكية لإعادة التشغيل وإصلاح التقطيع تلقائياً
-                hlsInstance = new Hls({
-                    maxBufferLength: 30,
-                    maxMaxBufferLength: 60,
-                    enableWorker: true,
-                    lowLatencyMode: true
-                });
-                
+                hlsInstance = new Hls(hlsConfig);
                 hlsInstance.loadSource(streamUrl);
                 hlsInstance.attachMedia(video);
                 
                 hlsInstance.on(Hls.Events.MANIFEST_PARSED, function() {
-                    attemptSmartAutoplay();
+                    video.play().catch(err => {
+                        console.log("Auto-play prevented, forcing mute to start stream.");
+                        video.muted = true;
+                        video.play();
+                    });
                 });
 
-                // معالجة ذكية لأخطاء الشبكة والمانيفست لضمان عدم توقف الفيديو
+                // معالجة الأخطاء الذكية للسيرفرات لإعادة الاتصال التلقائي في حال الانقطاع المفاجئ
                 hlsInstance.on(Hls.Events.ERROR, function (event, data) {
                     if (data.fatal) {
                         switch (data.type) {
                             case Hls.ErrorTypes.NETWORK_ERROR:
-                                console.log('Network error encountered, trying to recover...');
+                                console.log("Network error encountered, trying to recover...");
                                 hlsInstance.startLoad();
                                 break;
                             case Hls.ErrorTypes.MEDIA_ERROR:
-                                console.log('Media error encountered, trying to recover...');
+                                console.log("Media error encountered, trying to recover...");
                                 hlsInstance.recoverMediaError();
                                 break;
                             default:
-                                console.log('Unrecoverable error, re-initializing player...');
-                                initHlsCore(streamUrl);
+                                console.log("Unrecoverable error, switching native stream fallback.");
+                                video.src = streamUrl;
                                 break;
                         }
                     }
                 });
-            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+            } else if (video.canPlayType('application/vnd.apple.mpegurl') || video.canPlayType('application/x-mpegURL')) {
+                // توافقية الدعم الأصلي على أجهزة آيفون ومتصفحات السافاري
                 video.src = streamUrl;
                 video.addEventListener('loadedmetadata', function() {
-                    attemptSmartAutoplay();
+                    video.play().catch(err => console.log("Native playback request active"));
                 });
+            } else {
+                // خيار الدعم البديل للروابط العادية المباشرة
+                video.src = streamUrl;
+                video.play().catch(err => console.log("Direct source loaded"));
             }
-        }
-
-        function attemptSmartAutoplay() {
-            video.play().then(() => {
-                // يعمل بشكل طبيعي بالصوت
-                setVideoVolume(video.volume);
-            }).catch(error => {
-                console.log("Autoplay blocked, running in muted mode...");
-                // تجاوز سياسة حظر التشغيل التلقائي عبر الكتم المباشر
-                video.muted = true;
-                const slider = document.getElementById('volumeSlider');
-                slider.value = 0;
-                volumeIcon.innerHTML = '<i data-lucide="volume-x"></i>';
-                lucide.createIcons({ attrs: { 'data-lucide': true }, nameAttr: 'data-lucide', root: volumeIcon });
-                
-                video.play().catch(err => console.log("Playback failed completely:", err));
-            });
-        }
-
-        function openCustomPlayer(streamUrl) {
-            playerModal.classList.add('open');
-            resetControlsTimeout();
-            initHlsCore(streamUrl);
 
             videoContainer.addEventListener('mousemove', showControlsTemporarily);
             videoContainer.addEventListener('click', showControlsTemporarily);
@@ -1514,10 +1503,6 @@
 
         function setVideoVolume(val) {
             video.volume = val;
-            video.muted = (val == 0);
-            const slider = document.getElementById('volumeSlider');
-            slider.value = val;
-            
             if (val == 0) {
                 volumeIcon.innerHTML = '<i data-lucide="volume-x"></i>';
             } else if (val < 0.5) {
@@ -1536,7 +1521,6 @@
                 slider.value = 0;
             } else {
                 volumeIcon.innerHTML = '<i data-lucide="volume-2"></i>';
-                if(video.volume == 0) video.volume = 1;
                 slider.value = video.volume;
             }
             lucide.createIcons({ attrs: { 'data-lucide': true }, nameAttr: 'data-lucide', root: volumeIcon });
@@ -1552,7 +1536,7 @@
                 }
                 
                 if (screen.orientation && screen.orientation.lock) {
-                    screen.orientation.lock('landscape').catch(err => console.log("Orientation lock not supported"));
+                    screen.orientation.lock('landscape').catch(err => console.log("Orientation lock process initialization."));
                 }
             } else {
                 document.exitFullscreen();
@@ -1563,7 +1547,6 @@
             resetControlsTimeout();
         }
 
-        /* دوال إدارة وتغيير السيرفرات داخل المشغل */
         function toggleServersMenu(event) {
             event.stopPropagation();
             document.getElementById('serversMenuBox').classList.toggle('show');
@@ -1584,8 +1567,7 @@
             playerLoader.style.display = 'flex';
 
             const newUrl = SERVERS_LIST[serverId];
-            initHlsCore(newUrl);
-            resetControlsTimeout();
+            openCustomPlayer(newUrl);
         }
 
         function showControlsTemporarily() {
