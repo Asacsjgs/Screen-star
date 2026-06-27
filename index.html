@@ -25,7 +25,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     
     <style>
         :root {
@@ -720,7 +719,6 @@
             border-radius: 16px;
         }
 
-        /* عندما يتم تفعيل ملء الشاشة الكاملة للموقع أو المشغل */
         .video-container:fullscreen, .video-container:-webkit-full-screen {
             max-width: 100% !important;
             width: 100% !important;
@@ -736,12 +734,10 @@
             object-fit: contain;
         }
 
-        /* جعل الفيديو يتمدد بالكامل ويلغي السواد والخطوط الجانبية عند تفعيل الشاشة الكاملة */
         .video-container:fullscreen video, .video-container:-webkit-full-screen video {
             object-fit: fill !important;
         }
 
-        /* لوحة التحكم الذكية بمشغل الفيديو */
         .video-controls {
             position: absolute;
             bottom: 0;
@@ -763,7 +759,6 @@
             pointer-events: auto;
         }
 
-        /* شريط تقدم الفيديو المباشر */
         .video-progress-container {
             width: 100%;
             height: 5px;
@@ -816,7 +811,6 @@
             height: 24px;
         }
 
-        /* التحكم الذكي بالصوت */
         .volume-container {
             display: flex;
             align-items: center;
@@ -844,7 +838,6 @@
             cursor: pointer;
         }
 
-        /* علامة الجودة HD للموقع */
         .hd-badge {
             font-size: 11px;
             font-weight: 800;
@@ -855,7 +848,6 @@
             letter-spacing: 0.5px;
         }
 
-        /* تصميم قائمة اختيار السيرفرات المخصصة */
         .servers-menu {
             position: absolute;
             bottom: 45px;
@@ -901,7 +893,6 @@
             color: #030712;
         }
 
-        /* لودر التحميل الخاص بالفيديو */
         .player-loader {
             position: absolute;
             top: 50%;
@@ -944,7 +935,6 @@
         }
     </style>
     <link rel="icon" type="image/webp" href="https://i.ibb.co/bgD3t1SL/Picsart-26-06-27-13-42-39-009.webp">
-
 </head>
 <body>
 
@@ -1078,9 +1068,9 @@
                             <i data-lucide="server"></i>
                         </button>
                         <div class="servers-menu" id="serversMenuBox">
-                            <button class="server-option active" onclick="changeServer(1)">سيرفر 1 (المحلي)</button>
-                            <button class="server-option" onclick="changeServer(2)">سيرفر 2 (رئيسي)</button>
-                            <button class="server-option" onclick="changeServer(3)">سيرفر 3 (احتياطي)</button>
+                            <button class="server-option active" onclick="changeServer(1)">سيرفر 1 الرئيسي</button>
+                            <button class="server-option" onclick="changeServer(2)">سيرفر 2 الاحتياطي</button>
+                            <button class="server-option" onclick="changeServer(3)">سيرفر 3 منوع</button>
                         </div>
 
                         <button class="player-btn" onclick="togglePlayerFullscreen()" id="fullscreenBtn" title="تكبير الشاشة والتدوير الأفقي">
@@ -1116,11 +1106,11 @@
         let currentLang = 'ar'; 
         let controlsTimeout;
 
-        // مصفوفة السيرفرات المحدثة التي تدعم الروابط المرسلة بالكامل
+        // مصفوفة السيرفرات الكاملة التي قمت بتزويدي بها للعمل بدون مكتبات
         const SERVERS_LIST = {
-            1: "http://lookprotvappfree.mytunnel.org:8080/memfs/e1dbc72b-e5cb-4a87-bdc2-3fe989da615e.m3u8",
-            2: "https://live-aburayhan1107.telewebion.ir/ek/faratar/live/720p/index.m3u8",
-            3: "https://stm.linkip.org/live/1956_.m3u8"
+            1: "https://stm.linkip.org/live/1957_.m3u8",
+            2: "https://stm.linkip.org/live/1956_.m3u8",
+            3: "https://stm.linkip.org/live/1965_.m3u8"
         };
         let activeServerId = 1;
 
@@ -1150,7 +1140,7 @@
                 lnkReport: "الإبلاغ عن مشكلة",
                 modalReportTitle: "بلاغ عن مشكلة في الموقع",
                 reportDescText: "يسعدنا تلقي ملاحظاتك لحل أي مشكلة تواجهها فوراً.",
-                reportPlaceholder: "اكتب تفاصيل المشكلة أو الخلل الذي يواجهك هنا...",
+                reportPlaceholder: "اكتب تفاصيل المشكلة أو الخلل الذي يواجهك هنا... ",
                 btnSubmitReport: "إرسال البلاغ",
                 toastSuccess: "تم الإرسال",
                 privacyTitle: "سياسة الخصوصية لموقع نجم الشاشات",
@@ -1371,7 +1361,7 @@
         }
 
         /* ------------------------------------------------------------------ */
-        /* العمليات البرمجية للمشغل الذكي الجديد التكيفي */
+        /* العمليات البرمجية للمشغل النظيف بدون أي مكتبة خارجية */
         /* ------------------------------------------------------------------ */
         const video = document.getElementById('mainVideoPlayer');
         const videoContainer = document.getElementById('videoContainerBox');
@@ -1380,49 +1370,23 @@
         const volumeIcon = document.getElementById('volumeBtn');
         const playerLoader = document.getElementById('playerLoader');
         const progressBar = document.getElementById('videoProgressBar');
-        let hlsInstance = null;
 
         function openCustomPlayer(streamUrl) {
             playerModal.classList.add('open');
             playerLoader.style.display = 'flex';
             resetControlsTimeout();
 
-            if (Hls.isSupported()) {
-                if (hlsInstance) { hlsInstance.destroy(); }
-                
-                // إعدادات مخصصة لتجاوز أخطاء البث المباشر المتقطع
-                hlsInstance = new Hls({
-                    maxBufferLength: 30,
-                    maxMaxBufferLength: 600,
-                    enableWorker: true,
-                    lowLatencyMode: true
-                });
-                
-                hlsInstance.loadSource(streamUrl);
-                hlsInstance.attachMedia(video);
-                hlsInstance.on(Hls.Events.MANIFEST_PARSED, function() {
-                    video.play().catch(e => console.log("Auto-play blocked, interaction required."));
-                });
-
-                // معالجة ذكية للأخطاء من أجل استمرار البث تلقائياً دون توقف
-                hlsInstance.on(Hls.Events.ERROR, function (event, data) {
-                    if (data.fatal) {
-                        switch (data.type) {
-                            case Hls.ErrorTypes.NETWORK_ERROR:
-                                hlsInstance.startLoad();
-                                break;
-                            case Hls.ErrorTypes.MEDIA_ERROR:
-                                hlsInstance.recoverMediaError();
-                                break;
-                            default:
-                                break;
-                        }
-                    }
-                });
-            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                video.src = streamUrl;
-                video.addEventListener('loadedmetadata', function() {
-                    video.play();
+            // تشغيل البث بالاعتماد الكامل على قدرات المتصفح الأصلية والنظام دون مكتبات خارجية
+            video.src = streamUrl;
+            video.load();
+            
+            let playPromise = video.play();
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    playerLoader.style.display = 'none';
+                }).catch(error => {
+                    console.log("الامتداد يتطلب تفاعل أو مشغل نظام خارجي: ", error);
+                    playerLoader.style.display = 'none';
                 });
             }
 
@@ -1433,8 +1397,8 @@
 
         function closeCustomPlayer() {
             video.pause();
-            if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; }
             video.src = "";
+            video.load();
             if (document.fullscreenElement) { document.exitFullscreen(); }
             playerModal.classList.remove('open');
             document.getElementById('serversMenuBox').classList.remove('show');
@@ -1532,7 +1496,6 @@
             resetControlsTimeout();
         }
 
-        /* دوال إدارة وتغيير السيرفرات داخل المشغل */
         function toggleServersMenu(event) {
             event.stopPropagation();
             document.getElementById('serversMenuBox').classList.toggle('show');
@@ -1553,38 +1516,13 @@
             playerLoader.style.display = 'flex';
 
             const newUrl = SERVERS_LIST[serverId];
-            if (Hls.isSupported()) {
-                if (hlsInstance) { hlsInstance.destroy(); }
-                hlsInstance = new Hls({
-                    maxBufferLength: 30,
-                    maxMaxBufferLength: 600,
-                    enableWorker: true,
-                    lowLatencyMode: true
-                });
-                hlsInstance.loadSource(newUrl);
-                hlsInstance.attachMedia(video);
-                hlsInstance.on(Hls.Events.MANIFEST_PARSED, function() {
-                    video.play().catch(e => console.log("Playback error dynamic switch"));
-                });
-                
-                hlsInstance.on(Hls.Events.ERROR, function (event, data) {
-                    if (data.fatal) {
-                        switch (data.type) {
-                            case Hls.ErrorTypes.NETWORK_ERROR:
-                                hlsInstance.startLoad();
-                                break;
-                            case Hls.ErrorTypes.MEDIA_ERROR:
-                                hlsInstance.recoverMediaError();
-                                break;
-                            default:
-                                break;
-                        }
-                    }
-                });
-            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                video.src = newUrl;
-                video.play();
-            }
+            video.src = newUrl;
+            video.load();
+            video.play().then(() => {
+                playerLoader.style.display = 'none';
+            }).catch(() => {
+                playerLoader.style.display = 'none';
+            });
             resetControlsTimeout();
         }
 
@@ -1605,7 +1543,6 @@
         document.addEventListener('click', function() {
             document.getElementById('serversMenuBox').classList.remove('show');
         });
-
         /* ------------------------------------------------------------------ */
 
         function getLocalizedTime(utcString) {
