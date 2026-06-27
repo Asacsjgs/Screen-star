@@ -1078,9 +1078,9 @@
                             <i data-lucide="server"></i>
                         </button>
                         <div class="servers-menu" id="serversMenuBox">
-                            <button class="server-option active" onclick="changeServer(1)">سيرفر 1 (1080p)</button>
-                            <button class="server-option" onclick="changeServer(2)">سيرفر 2 (720p)</button>
-                            <button class="server-option" onclick="changeServer(3)">سيرفر 3 (360p)</button>
+                            <button class="server-option active" onclick="changeServer(1)">سيرفر 1 (المحلي)</button>
+                            <button class="server-option" onclick="changeServer(2)">سيرفر 2 (رئيسي)</button>
+                            <button class="server-option" onclick="changeServer(3)">سيرفر 3 (احتياطي)</button>
                         </div>
 
                         <button class="player-btn" onclick="togglePlayerFullscreen()" id="fullscreenBtn" title="تكبير الشاشة والتدوير الأفقي">
@@ -1116,11 +1116,11 @@
         let currentLang = 'ar'; 
         let controlsTimeout;
 
-        // مصفوفة السيرفرات الثلاثة التي قمت بتزويدي بها
+        // مصفوفة السيرفرات المحدثة التي تدعم الروابط المرسلة بالكامل
         const SERVERS_LIST = {
             1: "http://lookprotvappfree.mytunnel.org:8080/memfs/e1dbc72b-e5cb-4a87-bdc2-3fe989da615e.m3u8",
-            2: "https://stm.linkip.org/live/1956_.m3u8",
-            3: "https://stm.linkip.org/live/1965_.m3u8"
+            2: "https://live-aburayhan1107.telewebion.ir/ek/faratar/live/720p/index.m3u8",
+            3: "https://stm.linkip.org/live/1956_.m3u8"
         };
         let activeServerId = 1;
 
@@ -1371,7 +1371,7 @@
         }
 
         /* ------------------------------------------------------------------ */
-        /* العمليات البرمجية للمشغل الذكي الجديد */
+        /* العمليات البرمجية للمشغل الذكي الجديد التكيفي */
         /* ------------------------------------------------------------------ */
         const video = document.getElementById('mainVideoPlayer');
         const videoContainer = document.getElementById('videoContainerBox');
@@ -1389,11 +1389,35 @@
 
             if (Hls.isSupported()) {
                 if (hlsInstance) { hlsInstance.destroy(); }
-                hlsInstance = new Hls();
+                
+                // إعدادات مخصصة لتجاوز أخطاء البث المباشر المتقطع
+                hlsInstance = new Hls({
+                    maxBufferLength: 30,
+                    maxMaxBufferLength: 600,
+                    enableWorker: true,
+                    lowLatencyMode: true
+                });
+                
                 hlsInstance.loadSource(streamUrl);
                 hlsInstance.attachMedia(video);
                 hlsInstance.on(Hls.Events.MANIFEST_PARSED, function() {
-                    video.play();
+                    video.play().catch(e => console.log("Auto-play blocked, interaction required."));
+                });
+
+                // معالجة ذكية للأخطاء من أجل استمرار البث تلقائياً دون توقف
+                hlsInstance.on(Hls.Events.ERROR, function (event, data) {
+                    if (data.fatal) {
+                        switch (data.type) {
+                            case Hls.ErrorTypes.NETWORK_ERROR:
+                                hlsInstance.startLoad();
+                                break;
+                            case Hls.ErrorTypes.MEDIA_ERROR:
+                                hlsInstance.recoverMediaError();
+                                break;
+                            default:
+                                break;
+                        }
+                    }
                 });
             } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
                 video.src = streamUrl;
@@ -1519,7 +1543,6 @@
             if (serverId === activeServerId) return;
             activeServerId = serverId;
             
-            // تحديث الشكل النشط في القائمة
             const options = document.querySelectorAll('.server-option');
             options.forEach((opt, idx) => {
                 if (idx === (serverId - 1)) opt.classList.add('active');
@@ -1529,15 +1552,34 @@
             document.getElementById('serversMenuBox').classList.remove('show');
             playerLoader.style.display = 'flex';
 
-            // إعادة ربط البث بالسيرفر الجديد فوراً دون إغلاق الشاشة
             const newUrl = SERVERS_LIST[serverId];
             if (Hls.isSupported()) {
                 if (hlsInstance) { hlsInstance.destroy(); }
-                hlsInstance = new Hls();
+                hlsInstance = new Hls({
+                    maxBufferLength: 30,
+                    maxMaxBufferLength: 600,
+                    enableWorker: true,
+                    lowLatencyMode: true
+                });
                 hlsInstance.loadSource(newUrl);
                 hlsInstance.attachMedia(video);
                 hlsInstance.on(Hls.Events.MANIFEST_PARSED, function() {
-                    video.play();
+                    video.play().catch(e => console.log("Playback error dynamic switch"));
+                });
+                
+                hlsInstance.on(Hls.Events.ERROR, function (event, data) {
+                    if (data.fatal) {
+                        switch (data.type) {
+                            case Hls.ErrorTypes.NETWORK_ERROR:
+                                hlsInstance.startLoad();
+                                break;
+                            case Hls.ErrorTypes.MEDIA_ERROR:
+                                hlsInstance.recoverMediaError();
+                                break;
+                            default:
+                                break;
+                        }
+                    }
                 });
             } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
                 video.src = newUrl;
@@ -1560,7 +1602,6 @@
             }, 3000); 
         }
 
-        // إغلاق قائمة السيرفرات عند النقر في أي مكان آخر داخل المشغل
         document.addEventListener('click', function() {
             document.getElementById('serversMenuBox').classList.remove('show');
         });
@@ -1746,7 +1787,6 @@
                         btnEl.className = `btn-subscribe ${customButtonClass}`;
                         btnEl.innerText = buttonDynamicText;
                         
-                        // تصحيح: تمرير دالة مجهولة لمنع مشاكل الاقتباسات وحالة الشرط أثناء التحديث التلقائي
                         btnEl.onclick = function() { handleMatchButtonClick(state); };
                         
                         const countBox = existingSlide.querySelector('.badge-container div[id^="count-box-"]');
@@ -1780,7 +1820,6 @@
                                 <button class="btn-subscribe ${customButtonClass}">${buttonDynamicText}</button>
                             </div>
                         `;
-                        // ربط الحدث برمجياً بشكل مستقل وآمن تماماً
                         slideDiv.querySelector('.btn-subscribe').onclick = function() { handleMatchButtonClick(state); };
                         wrapper.appendChild(slideDiv);
                     }
