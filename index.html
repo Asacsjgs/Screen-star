@@ -25,6 +25,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     
     <style>
         :root {
@@ -719,6 +720,7 @@
             border-radius: 16px;
         }
 
+        /* عندما يتم تفعيل ملء الشاشة الكاملة للموقع أو المشغل */
         .video-container:fullscreen, .video-container:-webkit-full-screen {
             max-width: 100% !important;
             width: 100% !important;
@@ -734,10 +736,12 @@
             object-fit: contain;
         }
 
+        /* جعل الفيديو يتمدد بالكامل ويلغي السواد والخطوط الجانبية عند تفعيل الشاشة الكاملة */
         .video-container:fullscreen video, .video-container:-webkit-full-screen video {
             object-fit: fill !important;
         }
 
+        /* لوحة التحكم الذكية بمشغل الفيديو */
         .video-controls {
             position: absolute;
             bottom: 0;
@@ -759,6 +763,7 @@
             pointer-events: auto;
         }
 
+        /* شريط تقدم الفيديو المباشر */
         .video-progress-container {
             width: 100%;
             height: 5px;
@@ -811,6 +816,7 @@
             height: 24px;
         }
 
+        /* التحكم الذكي بالصوت */
         .volume-container {
             display: flex;
             align-items: center;
@@ -838,6 +844,7 @@
             cursor: pointer;
         }
 
+        /* علامة الجودة HD للموقع */
         .hd-badge {
             font-size: 11px;
             font-weight: 800;
@@ -848,6 +855,7 @@
             letter-spacing: 0.5px;
         }
 
+        /* تصميم قائمة اختيار السيرفرات المخصصة */
         .servers-menu {
             position: absolute;
             bottom: 45px;
@@ -893,6 +901,7 @@
             color: #030712;
         }
 
+        /* لودر التحميل الخاص بالفيديو */
         .player-loader {
             position: absolute;
             top: 50%;
@@ -935,6 +944,7 @@
         }
     </style>
     <link rel="icon" type="image/webp" href="https://i.ibb.co/bgD3t1SL/Picsart-26-06-27-13-42-39-009.webp">
+
 </head>
 <body>
 
@@ -1068,9 +1078,9 @@
                             <i data-lucide="server"></i>
                         </button>
                         <div class="servers-menu" id="serversMenuBox">
-                            <button class="server-option active" onclick="changeServer(1)">سيرفر 1 الرئيسي</button>
-                            <button class="server-option" onclick="changeServer(2)">سيرفر 2 الاحتياطي</button>
-                            <button class="server-option" onclick="changeServer(3)">سيرفر 3 منوع</button>
+                            <button class="server-option active" onclick="changeServer(1)">سيرفر 1 (1080p)</button>
+                            <button class="server-option" onclick="changeServer(2)">سيرفر 2 (720p)</button>
+                            <button class="server-option" onclick="changeServer(3)">سيرفر 3 (360p)</button>
                         </div>
 
                         <button class="player-btn" onclick="togglePlayerFullscreen()" id="fullscreenBtn" title="تكبير الشاشة والتدوير الأفقي">
@@ -1106,11 +1116,11 @@
         let currentLang = 'ar'; 
         let controlsTimeout;
 
-        // مصفوفة السيرفرات الكاملة التي قمت بتزويدي بها للعمل بدون مكتبات
+        // مصفوفة السيرفرات الثلاثة التي قمت بتزويدي بها
         const SERVERS_LIST = {
-            1: "https://stm.linkip.org/live/1957_.m3u8",
-            2: "https://stm.linkip.org/live/1956_.m3u8",
-            3: "https://stm.linkip.org/live/1965_.m3u8"
+            1: "https://edge22.776740.ir.cdn.ir/hls2/sport.m3u8",
+            2: "https://goal-livetv.pages.dev/GUBA_STREAM_8K%202.m3u8",
+            3: "https://pepsi3.abntv.live/hls/psp1.m3u8"
         };
         let activeServerId = 1;
 
@@ -1140,7 +1150,7 @@
                 lnkReport: "الإبلاغ عن مشكلة",
                 modalReportTitle: "بلاغ عن مشكلة في الموقع",
                 reportDescText: "يسعدنا تلقي ملاحظاتك لحل أي مشكلة تواجهها فوراً.",
-                reportPlaceholder: "اكتب تفاصيل المشكلة أو الخلل الذي يواجهك هنا... ",
+                reportPlaceholder: "اكتب تفاصيل المشكلة أو الخلل الذي يواجهك هنا...",
                 btnSubmitReport: "إرسال البلاغ",
                 toastSuccess: "تم الإرسال",
                 privacyTitle: "سياسة الخصوصية لموقع نجم الشاشات",
@@ -1361,7 +1371,7 @@
         }
 
         /* ------------------------------------------------------------------ */
-        /* العمليات البرمجية للمشغل النظيف بدون أي مكتبة خارجية */
+        /* العمليات البرمجية للمشغل الذكي الجديد */
         /* ------------------------------------------------------------------ */
         const video = document.getElementById('mainVideoPlayer');
         const videoContainer = document.getElementById('videoContainerBox');
@@ -1370,23 +1380,25 @@
         const volumeIcon = document.getElementById('volumeBtn');
         const playerLoader = document.getElementById('playerLoader');
         const progressBar = document.getElementById('videoProgressBar');
+        let hlsInstance = null;
 
         function openCustomPlayer(streamUrl) {
             playerModal.classList.add('open');
             playerLoader.style.display = 'flex';
             resetControlsTimeout();
 
-            // تشغيل البث بالاعتماد الكامل على قدرات المتصفح الأصلية والنظام دون مكتبات خارجية
-            video.src = streamUrl;
-            video.load();
-            
-            let playPromise = video.play();
-            if (playPromise !== undefined) {
-                playPromise.then(() => {
-                    playerLoader.style.display = 'none';
-                }).catch(error => {
-                    console.log("الامتداد يتطلب تفاعل أو مشغل نظام خارجي: ", error);
-                    playerLoader.style.display = 'none';
+            if (Hls.isSupported()) {
+                if (hlsInstance) { hlsInstance.destroy(); }
+                hlsInstance = new Hls();
+                hlsInstance.loadSource(streamUrl);
+                hlsInstance.attachMedia(video);
+                hlsInstance.on(Hls.Events.MANIFEST_PARSED, function() {
+                    video.play();
+                });
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                video.src = streamUrl;
+                video.addEventListener('loadedmetadata', function() {
+                    video.play();
                 });
             }
 
@@ -1397,8 +1409,8 @@
 
         function closeCustomPlayer() {
             video.pause();
+            if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; }
             video.src = "";
-            video.load();
             if (document.fullscreenElement) { document.exitFullscreen(); }
             playerModal.classList.remove('open');
             document.getElementById('serversMenuBox').classList.remove('show');
@@ -1496,6 +1508,7 @@
             resetControlsTimeout();
         }
 
+        /* دوال إدارة وتغيير السيرفرات داخل المشغل */
         function toggleServersMenu(event) {
             event.stopPropagation();
             document.getElementById('serversMenuBox').classList.toggle('show');
@@ -1506,6 +1519,7 @@
             if (serverId === activeServerId) return;
             activeServerId = serverId;
             
+            // تحديث الشكل النشط في القائمة
             const options = document.querySelectorAll('.server-option');
             options.forEach((opt, idx) => {
                 if (idx === (serverId - 1)) opt.classList.add('active');
@@ -1515,14 +1529,20 @@
             document.getElementById('serversMenuBox').classList.remove('show');
             playerLoader.style.display = 'flex';
 
+            // إعادة ربط البث بالسيرفر الجديد فوراً دون إغلاق الشاشة
             const newUrl = SERVERS_LIST[serverId];
-            video.src = newUrl;
-            video.load();
-            video.play().then(() => {
-                playerLoader.style.display = 'none';
-            }).catch(() => {
-                playerLoader.style.display = 'none';
-            });
+            if (Hls.isSupported()) {
+                if (hlsInstance) { hlsInstance.destroy(); }
+                hlsInstance = new Hls();
+                hlsInstance.loadSource(newUrl);
+                hlsInstance.attachMedia(video);
+                hlsInstance.on(Hls.Events.MANIFEST_PARSED, function() {
+                    video.play();
+                });
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                video.src = newUrl;
+                video.play();
+            }
             resetControlsTimeout();
         }
 
@@ -1540,9 +1560,11 @@
             }, 3000); 
         }
 
+        // إغلاق قائمة السيرفرات عند النقر في أي مكان آخر داخل المشغل
         document.addEventListener('click', function() {
             document.getElementById('serversMenuBox').classList.remove('show');
         });
+
         /* ------------------------------------------------------------------ */
 
         function getLocalizedTime(utcString) {
@@ -1724,6 +1746,7 @@
                         btnEl.className = `btn-subscribe ${customButtonClass}`;
                         btnEl.innerText = buttonDynamicText;
                         
+                        // تصحيح: تمرير دالة مجهولة لمنع مشاكل الاقتباسات وحالة الشرط أثناء التحديث التلقائي
                         btnEl.onclick = function() { handleMatchButtonClick(state); };
                         
                         const countBox = existingSlide.querySelector('.badge-container div[id^="count-box-"]');
@@ -1757,6 +1780,7 @@
                                 <button class="btn-subscribe ${customButtonClass}">${buttonDynamicText}</button>
                             </div>
                         `;
+                        // ربط الحدث برمجياً بشكل مستقل وآمن تماماً
                         slideDiv.querySelector('.btn-subscribe').onclick = function() { handleMatchButtonClick(state); };
                         wrapper.appendChild(slideDiv);
                     }
