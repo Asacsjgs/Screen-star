@@ -1382,25 +1382,67 @@
         const progressBar = document.getElementById('videoProgressBar');
         let hlsInstance = null;
 
+        // دالة موحدة لتهيئة معالجة أخطاء الـ HLS وإعادة الاتصال عند التقطيع تلقائياً
+        function initHlsCore(streamUrl) {
+            if (hlsInstance) { 
+                hlsInstance.destroy(); 
+                hlsInstance = null;
+            }
+
+            if (Hls.isSupported()) {
+                hlsInstance = new Hls({
+                    maxMaxBufferLength: 10,
+                    enableWorker: true,
+                    lowLatencyMode: true
+                });
+                hlsInstance.loadSource(streamUrl);
+                hlsInstance.attachMedia(video);
+                
+                hlsInstance.on(Hls.Events.MANIFEST_PARSED, function() {
+                    video.play().catch(function() {
+                        // كتم الصوت تلقائياً لتجاوز قيود متصفح كروم وسفاري على الهواتف
+                        video.muted = true;
+                        video.play();
+                    });
+                });
+
+                // معالجة الأخطاء الذكية في حالة انقطاع السيرفر أو تبديل الشبكة
+                hlsInstance.on(Hls.Events.ERROR, function(event, data) {
+                    if (data.fatal) {
+                        switch (data.type) {
+                            case Hls.ErrorTypes.NETWORK_ERROR:
+                                console.log("خطأ في الشبكة، جاري إعادة الاتصال بالسيرفر...");
+                                hlsInstance.startLoad();
+                                break;
+                            case Hls.ErrorTypes.MEDIA_ERROR:
+                                console.log("خطأ في قراءة البث المباشر، جاري معالجة الكودك...");
+                                hlsInstance.recoverMediaError();
+                                break;
+                            default:
+                                console.log("خطأ فادح غير معروف، جاري إعطاء أمر إعادة تهيئة...");
+                                initHlsCore(streamUrl);
+                                break;
+                        }
+                    }
+                });
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                // تشغيل مباشر لهواتف آيفون ومتصفح سفاري
+                video.src = streamUrl;
+                video.addEventListener('loadedmetadata', function() {
+                    video.play().catch(function() {
+                        video.muted = true;
+                        video.play();
+                    });
+                });
+            }
+        }
+
         function openCustomPlayer(streamUrl) {
             playerModal.classList.add('open');
             playerLoader.style.display = 'flex';
             resetControlsTimeout();
 
-            if (Hls.isSupported()) {
-                if (hlsInstance) { hlsInstance.destroy(); }
-                hlsInstance = new Hls();
-                hlsInstance.loadSource(streamUrl);
-                hlsInstance.attachMedia(video);
-                hlsInstance.on(Hls.Events.MANIFEST_PARSED, function() {
-                    video.play();
-                });
-            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                video.src = streamUrl;
-                video.addEventListener('loadedmetadata', function() {
-                    video.play();
-                });
-            }
+            initHlsCore(streamUrl);
 
             videoContainer.addEventListener('mousemove', showControlsTemporarily);
             videoContainer.addEventListener('click', showControlsTemporarily);
@@ -1531,18 +1573,7 @@
 
             // إعادة ربط البث بالسيرفر الجديد فوراً دون إغلاق الشاشة
             const newUrl = SERVERS_LIST[serverId];
-            if (Hls.isSupported()) {
-                if (hlsInstance) { hlsInstance.destroy(); }
-                hlsInstance = new Hls();
-                hlsInstance.loadSource(newUrl);
-                hlsInstance.attachMedia(video);
-                hlsInstance.on(Hls.Events.MANIFEST_PARSED, function() {
-                    video.play();
-                });
-            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                video.src = newUrl;
-                video.play();
-            }
+            initHlsCore(newUrl);
             resetControlsTimeout();
         }
 
@@ -1746,7 +1777,6 @@
                         btnEl.className = `btn-subscribe ${customButtonClass}`;
                         btnEl.innerText = buttonDynamicText;
                         
-                        // تصحيح: تمرير دالة مجهولة لمنع مشاكل الاقتباسات وحالة الشرط أثناء التحديث التلقائي
                         btnEl.onclick = function() { handleMatchButtonClick(state); };
                         
                         const countBox = existingSlide.querySelector('.badge-container div[id^="count-box-"]');
@@ -1780,7 +1810,6 @@
                                 <button class="btn-subscribe ${customButtonClass}">${buttonDynamicText}</button>
                             </div>
                         `;
-                        // ربط الحدث برمجياً بشكل مستقل وآمن تماماً
                         slideDiv.querySelector('.btn-subscribe').onclick = function() { handleMatchButtonClick(state); };
                         wrapper.appendChild(slideDiv);
                     }
