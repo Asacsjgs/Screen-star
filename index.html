@@ -1816,11 +1816,13 @@
         loadEspnMatches();
         lucide.createIcons();
         setInterval(loadEspnMatches, 45000); 
-      // ... (هذا جزء من الكود الخاص بك الموجود مسبقاً)
+     updatePrivacyText();
+    loadEspnMatches();
+    lucide.createIcons();
     setInterval(loadEspnMatches, 45000);
 </script>
 
-<!-- كود الإشعارات الجديد (يجب أن يكون هنا خارج السكربت القديم) -->
+<!-- كود الإشعارات الجديد (نسخة v16) -->
 <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 <script>
   window.OneSignalDeferred = window.OneSignalDeferred || [];
@@ -1834,6 +1836,6 @@
 </body>
 </html>
 
-  </script>
+   </script>
 </body>
 </html>
