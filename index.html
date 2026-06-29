@@ -722,6 +722,20 @@
             border-radius: 16px;
         }
 
+        /* الحقوق داخل الفيديو */
+        .watermark-text {
+            position: absolute;
+            bottom: 15px;
+            left: 15px;
+            font-size: 12px;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.6);
+            z-index: 5;
+            pointer-events: none;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
         /* عندما يتم تفعيل ملء الشاشة الكاملة للموقع أو المشغل */
         .video-container:fullscreen, .video-container:-webkit-full-screen {
             max-width: 100% !important;
@@ -1045,6 +1059,8 @@
 
     <div class="player-modal" id="customPlayerModal">
         <div class="video-container" id="videoContainerBox">
+            <div class="watermark-text">نجم الشاشات</div>
+            
             <div class="player-loader" id="playerLoader">
                 <div class="spinner"></div>
             </div>
@@ -1130,7 +1146,7 @@
 
         const teamTranslationDictionary = {
             "Portugal": "البرتغال", "Uzbekistan": "أوزبكستان", "Argentina": "الأرجنتين",
-            "Austria": "النمسا", "Brazil": "البرازيل", "France": "فرنسا", "Spain": "إسبانيا",
+            "Austria": "النمسا", "Brazil": "البرزيل", "France": "فرنسا", "Spain": "إسبانيا",
             "Germany": "ألمانيا", "England": "إنجلترا", "Italy": "إيطاليا", "Netherlands": "هولندا",
             "Morocco": "المغرب", "Egypt": "مصر", "Saudi Arabia": "السعودية", "Iraq": "العراق",
             "Jordan": "الأردن", "UAE": "الإمارات", "Qatar": "قطر", "Japan": "اليابان",
@@ -1402,6 +1418,17 @@
                 video.addEventListener('loadedmetadata', function() {
                     video.play();
                 });
+            }
+
+            // تفعيل الشاشة الكاملة وتدوير الشاشة أفقياً بمجرد الضغط على زر التشغيل
+            if (videoContainer.requestFullscreen) {
+                videoContainer.requestFullscreen();
+            } else if (videoContainer.webkitRequestFullscreen) {
+                videoContainer.webkitRequestFullscreen();
+            }
+            
+            if (screen.orientation && screen.orientation.lock) {
+                screen.orientation.lock('landscape').catch(err => console.log("Orientation lock is not supported or needs a brief delay"));
             }
 
             videoContainer.addEventListener('mousemove', showControlsTemporarily);
@@ -1748,7 +1775,6 @@
                         btnEl.className = `btn-subscribe ${customButtonClass}`;
                         btnEl.innerText = buttonDynamicText;
                         
-                        // تصحيح: تمرير دالة مجهولة لمنع مشاكل الاقتباسات وحالة الشرط أثناء التحديث التلقائي
                         btnEl.onclick = function() { handleMatchButtonClick(state); };
                         
                         const countBox = existingSlide.querySelector('.badge-container div[id^="count-box-"]');
@@ -1782,7 +1808,6 @@
                                 <button class="btn-subscribe ${customButtonClass}">${buttonDynamicText}</button>
                             </div>
                         `;
-                        // ربط الحدث برمجياً بشكل مستقل وآمن تماماً
                         slideDiv.querySelector('.btn-subscribe').onclick = function() { handleMatchButtonClick(state); };
                         wrapper.appendChild(slideDiv);
                     }
