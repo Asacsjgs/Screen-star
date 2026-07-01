@@ -43,7 +43,8 @@
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Tajawal', 'Poppins', sans-serif;
+            /* استخدام خط الآيفون العريض والحديث كخيار أساسي */
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Arabic", "SF Pro Display", "Segoe UI", 'Tajawal', sans-serif;
             -webkit-tap-highlight-color: transparent;
         }
 
@@ -54,6 +55,7 @@
             overflow-x: hidden;
             display: flex;
             flex-direction: column;
+            padding-top: 85px;
         }
 
         header {
@@ -105,6 +107,278 @@
             border-color: #FFCC00;
             transform: scale(1.05);
         }
+
+        /* ------------------------------------------------------------------ */
+        /* تصميم شريط قسم الستوريات المخصص (أسلوب إنستغرام) */
+        /* ------------------------------------------------------------------ */
+        .stories-section {
+            width: 100%;
+            padding: 15px 20px 5px;
+            overflow-x: auto;
+            display: flex;
+            gap: 15px;
+            scrollbar-width: none;
+            position: relative;
+            z-index: 10;
+        }
+        .stories-section::-webkit-scrollbar {
+            display: none;
+        }
+        .story-tray-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            flex-shrink: 0;
+            width: 78px;
+        }
+        .story-avatar-wrapper {
+            width: 68px;
+            height: 68px;
+            border-radius: 50%;
+            padding: 3px;
+            background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        .story-avatar-wrapper.live {
+            background: linear-gradient(135deg, #EF4444 0%, #FF9500 100%);
+        }
+        .story-avatar-wrapper.live::after {
+            content: "LIVE";
+            position: absolute;
+            bottom: -5px;
+            background: #EF4444;
+            color: #fff;
+            font-size: 9px;
+            font-weight: 900;
+            padding: 2px 6px;
+            border-radius: 6px;
+            border: 2px solid var(--bg-deep);
+        }
+        .story-avatar-inner {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: var(--bg-deep);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border: 2px solid var(--bg-deep);
+        }
+        .story-avatar-inner img {
+            width: 85%;
+            height: 85%;
+            object-fit: contain;
+        }
+        .story-tray-label {
+            font-size: 11px;
+            font-weight: 800;
+            margin-top: 8px;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
+            color: #E5E7EB;
+        }
+
+        /* نافذة عرض الستوري بالكامل */
+        .story-view-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.96);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        .story-view-modal.open {
+            display: flex;
+        }
+        .story-window-container {
+            width: 100%;
+            max-width: 440px;
+            height: 100vh;
+            background: #111622;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        @media (min-width: 768px) {
+            .story-window-container {
+                height: 85vh;
+                border-radius: 20px;
+                border: 1px solid var(--glass-border);
+            }
+        }
+        .story-header-bars {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            right: 15px;
+            display: flex;
+            gap: 5px;
+            z-index: 20;
+        }
+        .story-progress-bg {
+            flex: 1;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.25);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .story-progress-fill {
+            height: 100%;
+            width: 0%;
+            background: #fff;
+        }
+        .story-top-meta {
+            position: absolute;
+            top: 30px;
+            left: 15px;
+            right: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 20;
+        }
+        .story-user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .story-meta-logo {
+            width: 36px;
+            height: 36px;
+            object-fit: contain;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+            padding: 4px;
+        }
+        .story-meta-names {
+            display: flex;
+            flex-direction: column;
+        }
+        .story-match-title-text {
+            font-size: 14px;
+            font-weight: 800;
+            color: #fff;
+        }
+        .story-match-status-pill {
+            font-size: 11px;
+            font-weight: 800;
+            color: #FFCC00;
+        }
+        .story-close-trigger {
+            background: transparent;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+        }
+        
+        /* محتوى شاشة الستوري الرئيسي */
+        .story-main-body-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px 20px;
+            position: relative;
+            background: radial-gradient(circle at center, #1e293b 0%, #0b0f19 100%);
+        }
+        .story-click-zones {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            z-index: 10;
+        }
+        .story-zone-left {
+            flex: 1;
+        }
+        .story-zone-right {
+            flex: 1;
+        }
+        .story-display-card {
+            width: 100%;
+            text-align: center;
+            z-index: 5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .story-teams-logos-layout {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        .story-team-block {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 110px;
+        }
+        .story-team-block img {
+            width: 75px;
+            height: 75px;
+            object-fit: contain;
+            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.5));
+        }
+        .story-team-block span {
+            font-size: 15px;
+            font-weight: 800;
+            margin-top: 10px;
+            color: #fff;
+            text-align: center;
+        }
+        .story-versus-badge {
+            font-size: 20px;
+            font-weight: 900;
+            color: #FFCC00;
+            background: rgba(255, 204, 0, 0.1);
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            border: 1px dashed #FFCC00;
+        }
+        .story-live-score-value {
+            font-size: 64px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            background: linear-gradient(180deg, #fff 0%, #9ca3af 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+        .story-automated-commentary {
+            font-size: 18px;
+            font-weight: 800; /* تفعيل الحجم العريض للآيفون */
+            color: #fff;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--glass-border);
+            padding: 15px 25px;
+            border-radius: 30px;
+            max-width: 90%;
+            text-align: center;
+            line-height: 1.6;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+        .story-action-footer {
+            padding: 20px;
+            z-index: 15;
+            background: rgba(11, 15, 25, 0.6);
+        }
+        /* ------------------------------------------------------------------ */
 
         .side-menu {
             position: fixed;
@@ -166,7 +440,7 @@
             color: var(--text-pure);
             text-decoration: none;
             font-size: 15px;
-            font-weight: 700;
+            font-weight: 800;
             transition: all 0.3s ease;
             cursor: pointer;
         }
@@ -199,7 +473,7 @@
         .footer-title {
             font-size: 13px;
             color: var(--text-muted);
-            font-weight: 700;
+            font-weight: 800;
             margin-bottom: 15px;
             text-align: center;
         }
@@ -220,7 +494,7 @@
             border-radius: 12px;
             text-decoration: none;
             font-size: 13px;
-            font-weight: 700;
+            font-weight: 800;
             color: white;
             transition: all 0.3s;
         }
@@ -281,13 +555,13 @@
             outline: none;
             color: var(--text-pure);
             font-size: 15px;
-            font-weight: 500;
+            font-weight: 800;
         }
 
         .hero-slider {
             position: relative;
             width: 100%;
-            height: 100vh;
+            height: calc(100vh - 180px);
             overflow: hidden;
             display: flex;
             align-items: center;
@@ -363,8 +637,8 @@
         }
 
         .team-name {
-            font-size: 15px; 
-            font-weight: 700;
+            font-size: 16px; 
+            font-weight: 800;
             margin-top: 14px;
             color: var(--text-pure);
             width: 100%;
@@ -391,7 +665,7 @@
 
         .time-box {
             font-size: 24px;
-            font-weight: 800;
+            font-weight: 900;
             color: #FFCC00;
             letter-spacing: 0.5px;
             background: var(--accent-linear);
@@ -413,7 +687,7 @@
             padding: 8px 22px; 
             border-radius: 12px;
             font-size: 13px;
-            font-weight: 700;
+            font-weight: 800;
             color: #E5E7EB;
         }
 
@@ -440,7 +714,7 @@
 
         .countdown-box {
             font-size: 12px;
-            font-weight: 700;
+            font-weight: 800;
             color: #FFCC00;
             background: rgba(255, 204, 0, 0.07);
             border: 1px dashed rgba(255, 204, 0, 0.3);
@@ -496,7 +770,7 @@
             padding: 18px;
             border-radius: 20px;
             font-size: 15px;
-            font-weight: 800;
+            font-weight: 900;
             cursor: pointer;
             box-shadow: 0 10px 25px rgba(255, 149, 0, 0.2);
             transition: all 0.3s ease;
@@ -666,7 +940,7 @@
             padding: 12px 24px;
             border-radius: 16px;
             font-size: 15px;
-            font-weight: 700;
+            font-weight: 800;
             box-shadow: 0 15px 30px rgba(16, 185, 129, 0.3);
             z-index: 400;
             display: flex;
@@ -728,7 +1002,7 @@
             bottom: 15px;
             left: 15px;
             font-size: 12px;
-            font-weight: 700;
+            font-weight: 800;
             color: rgba(255, 255, 255, 0.6);
             z-index: 5;
             pointer-events: none;
@@ -863,7 +1137,7 @@
         /* علامة الجودة HD للموقع */
         .hd-badge {
             font-size: 11px;
-            font-weight: 800;
+            font-weight: 900;
             color: #0b0f19;
             background: #FFCC00;
             padding: 3px 6px;
@@ -902,7 +1176,7 @@
         .server-option {
             padding: 8px 12px;
             font-size: 13px;
-            font-weight: 700;
+            font-weight: 800;
             color: #ffffff;
             background: transparent;
             border: none;
@@ -970,6 +1244,8 @@
         <div class="icon-btn" id="search-trigger-btn" onclick="toggleSearchBar()"><i data-lucide="search"></i></div>
     </header>
 
+    <div class="stories-section" id="storiesTrayContainer"></div>
+
     <div class="menu-overlay" id="menuOverlay" onclick="toggleSideMenu()"></div>
 
     <div class="side-menu" id="sideMenuBox">
@@ -1018,6 +1294,46 @@
                     <i data-lucide="youtube" style="width:16px;"></i> <span id="lblYoutube">يوتيوب</span>
                 </a>
             </div>
+        </div>
+    </div>
+
+    <div class="story-view-modal" id="storyViewerModal">
+        <div class="story-window-container">
+            <div class="story-header-bars" id="storyProgressBarsContainer"></div>
+            <div class="story-top-meta">
+                <div class="story-user-info">
+                    <img src="" class="story-meta-logo" id="storyMetaTeamLogo">
+                    <div class="story-meta-names">
+                        <span class="story-match-title-text" id="storyMetaMatchTitle">المباراة</span>
+                        <span class="story-match-status-pill" id="storyMetaStatusText">بث مباشر</span>
+                    </div>
+                </div>
+                <button class="story-close-trigger" onclick="closeStoryViewer()"><i data-lucide="x"></i></button>
+            </div>
+            
+            <div class="story-main-body-content">
+                <div class="story-click-zones">
+                    <div class="story-zone-left" onclick="navigateStory(-1)"></div>
+                    <div class="story-zone-right" onclick="navigateStory(1)"></div>
+                </div>
+                <div class="story-display-card">
+                    <div class="story-teams-logos-layout">
+                        <div class="story-team-block">
+                            <img src="" id="storyCardTeam1Logo">
+                            <span id="storyCardTeam1Name">الفريق 1</span>
+                        </div>
+                        <div class="story-versus-badge">VS</div>
+                        <div class="story-team-block">
+                            <img src="" id="storyCardTeam2Logo">
+                            <span id="storyCardTeam2Name">الفريق 2</span>
+                        </div>
+                    </div>
+                    <div class="story-live-score-value" id="storyCardLiveScore">0 - 0</div>
+                    <div class="story-automated-commentary" id="storyCardCommentary">جاري تحميل الأحداث...</div>
+                </div>
+            </div>
+            
+            <div class="story-action-footer" id="storyActionFooterArea"></div>
         </div>
     </div>
 
@@ -1134,7 +1450,14 @@
         let currentLang = 'ar'; 
         let controlsTimeout;
 
-        // مصفوفة السيرفرات الثلاثة التي قمت بتزويدي بها
+        // مصفوفة إدارة بيانات وعناصر الستوري النشط
+        let globalRawEventsData = [];
+        let currentActiveStoryIndex = 0;
+        let storyPlaybackTimer = null;
+        let storyProgressTicker = null;
+        let currentProgressPercent = 0;
+        const STORY_DURATION = 5000; 
+
         const SERVERS_LIST = {
             1: "http://luxepremium.live/live/melanie355/24666/683920.m3u8",
             2: "https://goal-livetv.pages.dev/GUBA_STREAM_8K%202.m3u8",
@@ -1197,7 +1520,7 @@
                     <p>مرحباً بك في موقع <strong>نجم الشاشات</strong>. نحن نولي أقصى درجات الأهمية لخصوصية زوارنا ومستخدمينا. توضح هذه السياسة البيانات التي نجمعها وكيفية التعامل معها.</p>
                     <p><strong>1. جمع المعلومات:</strong> لا نقوم بجمع أي معلومات شخصية عنك إلا إذا قمت بتقديمها طواعية عبر نموذج "الإبلاغ عن مشكلة" (مثل الرسائل والاقتراحات لغرض تحسين الخدمة).</p>
                     <p><strong>2. ملفات تعريف الارتباط (Cookies):</strong> قد يستخدم الموقع ملفات تعريف الارتباط الأساسية لتحسين تجربة تصفحك للجدول والمباريات وحفظ تفضيلات اللغة الخاصة بك.</p>
-                    <p><strong>3. البث والمحتوى الخارجي:</strong> يعتمد الموقع على جلب جداول المباريات الحية والبيانات الفنية من خوادم رياضية عالمية معتمدة لضمان الدقة، ونحن لا نستضيف أي محتوى غير قانوني.</p>
+                    <p><strong>3. :البث والمحتوى الخارجي</strong> يعتمد الموقع على جلب جداول المباريات الحية والبيانات الفنية من خوادم رياضية عالمية معتمدة لضمان الدقة، ونحن لا نستضيف أي محتوى غير قانوني.</p>
                     <p><strong>4. روابط الأطراف الثالثة:</strong> يحتوي موقعنا على روابط لتطبيقات أو قنوات تواصل اجتماعي خارجية (مثل تيليجرام ويوتيوب)، ونحن غير مسؤولين عن سياسات الخصوصية الخاصة بتلك المواقع الخارجية.</p>
                     <p><strong>5. حماية البيانات:</strong> نحن نتخذ إجراءات أمنية صارمة ومناسبة لحماية رسائلك وبياناتك من الوصول غير المصرح به أو التعديل عليها.</p>
                     <p>باستخدامك لموقعنا، فإنك توافق على بنود سياسة الخصوصية هذه.</p>
@@ -1400,7 +1723,6 @@
         const progressBar = document.getElementById('videoProgressBar');
         let hlsInstance = null;
 
-        // مصفوفة إعدادات خاصة لزيادة القوة وسرعة التشغيل الفوري والتقاط البث المباشر بأقل تأخير
         const fastHlsConfig = {
             enableWorker: true,
             lowLatencyMode: true,
@@ -1423,7 +1745,6 @@
 
             if (Hls.isSupported()) {
                 if (hlsInstance) { hlsInstance.destroy(); }
-                // هنا تم استخدام الإعدادات القوية والفائقة الفعالية للتشغيل السريع لثواني التخزين المؤقت الأولية
                 hlsInstance = new Hls(fastHlsConfig);
                 hlsInstance.loadSource(streamUrl);
                 hlsInstance.attachMedia(video);
@@ -1437,7 +1758,6 @@
                 });
             }
 
-            // تفعيل الشاشة الكاملة وتدوير الشاشة أفقياً بمجرد الضغط على زر التشغيل
             if (videoContainer.requestFullscreen) {
                 videoContainer.requestFullscreen();
             } else if (videoContainer.webkitRequestFullscreen) {
@@ -1445,7 +1765,7 @@
             }
             
             if (screen.orientation && screen.orientation.lock) {
-                screen.orientation.lock('landscape').catch(err => console.log("Orientation lock is not supported or needs a brief delay"));
+                screen.orientation.lock('landscape').catch(err => console.log("Orientation lock is not supported"));
             }
 
             videoContainer.addEventListener('mousemove', showControlsTemporarily);
@@ -1554,7 +1874,6 @@
             resetControlsTimeout();
         }
 
-        /* دوال إدارة وتغيير السيرفرات داخل المشغل */
         function toggleServersMenu(event) {
             event.stopPropagation();
             document.getElementById('serversMenuBox').classList.toggle('show');
@@ -1565,7 +1884,6 @@
             if (serverId === activeServerId) return;
             activeServerId = serverId;
             
-            // تحديث الشكل النشط في القائمة
             const options = document.querySelectorAll('.server-option');
             options.forEach((opt, idx) => {
                 if (idx === (serverId - 1)) opt.classList.add('active');
@@ -1575,7 +1893,6 @@
             document.getElementById('serversMenuBox').classList.remove('show');
             playerLoader.style.display = 'flex';
 
-            // إعادة ربط البث بالسيرفر الجديد فوراً دون إغلاق الشاشة باستخدام الإعدادات السريعة
             const newUrl = SERVERS_LIST[serverId];
             if (Hls.isSupported()) {
                 if (hlsInstance) { hlsInstance.destroy(); }
@@ -1606,7 +1923,6 @@
             }, 3000); 
         }
 
-        // إغلاق قائمة السيرفرات عند النقر في أي مكان آخر داخل المشغل
         document.addEventListener('click', function() {
             document.getElementById('serversMenuBox').classList.remove('show');
         });
@@ -1677,6 +1993,170 @@
             setTimeout(() => { overlay.classList.remove('show'); }, 4500);
         }
 
+        /* ------------------------------------------------------------------ */
+        /* نظام تشغيل وإدارة الستوريات الكاملة للموقع */
+        /* ------------------------------------------------------------------ */
+        function buildStoriesTrayUI() {
+            const tray = document.getElementById('storiesTrayContainer');
+            tray.innerHTML = '';
+            if (globalRawEventsData.length === 0) return;
+
+            globalRawEventsData.forEach((event, idx) => {
+                const comp = event.competitions[0];
+                const t1 = comp.competitors[0];
+                const t2 = comp.competitors[1];
+                const state = event.status.type.state;
+
+                const name1 = currentLang === 'ar' ? translateTeamName(t1.team.displayName) : t1.team.displayName;
+                const name2 = currentLang === 'ar' ? translateTeamName(t2.team.displayName) : t2.team.displayName;
+                const logo1 = t1.team.logo || 'https://a.espncdn.com/i/teamlogos/soccer/500/default-soccer.png';
+
+                const isLive = (state === 'in' && event.status.type.name !== 'STATUS_SUSPENDED');
+
+                const trayItem = document.createElement('div');
+                trayItem.className = 'story-tray-item';
+                trayItem.onclick = () => openStoryViewerAtIndex(idx);
+                trayItem.innerHTML = `
+                    <div class="story-avatar-wrapper ${isLive ? 'live' : ''}">
+                        <div class="story-avatar-inner">
+                            <img src="${logo1}">
+                        </div>
+                    </div>
+                    <div class="story-tray-label">${name1}</div>
+                `;
+                tray.appendChild(trayItem);
+            });
+        }
+
+        function openStoryViewerAtIndex(index) {
+            currentActiveStoryIndex = index;
+            document.getElementById('storyViewerModal').classList.add('open');
+            renderCurrentActiveStoryCard();
+        }
+
+        function closeStoryViewer() {
+            document.getElementById('storyViewerModal').classList.remove('open');
+            clearTimeout(storyPlaybackTimer);
+            clearInterval(storyProgressTicker);
+        }
+
+        function renderCurrentActiveStoryCard() {
+            clearTimeout(storyPlaybackTimer);
+            clearInterval(storyProgressTicker);
+
+            const event = globalRawEventsData[currentActiveStoryIndex];
+            const comp = event.competitions[0];
+            const t1 = comp.competitors[0];
+            const t2 = comp.competitors[1];
+            const state = event.status.type.state;
+
+            const name1 = currentLang === 'ar' ? translateTeamName(t1.team.displayName) : t1.team.displayName;
+            const name2 = currentLang === 'ar' ? translateTeamName(t2.team.displayName) : t2.team.displayName;
+            const logo1 = t1.team.logo || 'https://a.espncdn.com/i/teamlogos/soccer/500/default-soccer.png';
+            const logo2 = t2.team.logo || 'https://a.espncdn.com/i/teamlogos/soccer/500/default-soccer.png';
+            const score1 = parseInt(t1.score || '0');
+            const score2 = parseInt(t2.score || '0');
+
+            // تحديث الواجهة العلوية للستوري
+            document.getElementById('storyMetaTeamLogo').src = logo1;
+            document.getElementById('storyMetaMatchTitle').innerText = `${name1} × ${name2}`;
+            
+            // تهيئة شريط التقدم الفوقي للستوريات
+            const barsContainer = document.getElementById('storyProgressBarsContainer');
+            barsContainer.innerHTML = '';
+            globalRawEventsData.forEach((_, idx) => {
+                const fillWidth = idx < currentActiveStoryIndex ? '100%' : '0%';
+                barsContainer.innerHTML += `
+                    <div class="story-progress-bg">
+                        <div class="story-progress-fill" id="storyBarFill-${idx}" style="width: ${fillWidth};"></div>
+                    </div>
+                `;
+            });
+
+            // ------------------------------------------------------------------
+            // تعديل نصوص الستوري لتصبح احترافية، حماسية وغير متكررة
+            // ------------------------------------------------------------------
+            let commentaryText = "";
+            let statusBadgeLabel = "";
+            
+            if (state === 'in') {
+                statusBadgeLabel = currentLang === 'ar' ? "مباشر الآن" : "LIVE NOW";
+                commentaryText = currentLang === 'ar' ? 
+                    `⚡ القمة مشتعلة بأرض الملعب! مواجهة نارية تجمع ${name1} ضد ${name2} الآن، انضم للمشاهدة فوراً.` : 
+                    `⚡ Epic battle on the pitch! ${name1} vs ${name2} is live right now, don't miss a single second.`;
+            } else if (state === 'post') {
+                statusBadgeLabel = currentLang === 'ar' ? "صافرة النهاية" : "FULL TIME";
+                if (score1 === score2) {
+                    commentaryText = currentLang === 'ar' ? `🤝 انتهاء الملحمة الكروية المثيرة بالتعادل بين ${name1} و ${name2} بعد أداء بطولي!` : `🤝 A dramatic tactical encounter ends with a hard-fought draw!`;
+                } else if (score1 > score2) {
+                    commentaryText = currentLang === 'ar' ? `🎉 ليلة تاريخية! منتخب ${name1} يحسم المواجهة الكبرى لصالحه وينتزع فوزاً غاليًا من أمام ${name2}.` : `🎉 Historic night! ${name1} secures a massive victory after a brilliant performance against ${name2}.`;
+                } else {
+                    commentaryText = currentLang === 'ar' ? `🎉 ليلة تاريخية! منتخب ${name2} يحسم المواجهة الكبرى لصالحه وينتزع فوزاً غاليًا من أمام ${name1}.` : `🎉 Historic night! ${name2} secures a massive victory after a brilliant performance against ${name1}.`;
+                }
+            } else if (state === 'suspended') {
+                statusBadgeLabel = currentLang === 'ar' ? "أحداث متوقفة" : "MATCH SUSPENDED";
+                commentaryText = currentLang === 'ar' ? `⚠️ صافرة عاجلة: إيقاف مواجهة ${name1} و ${name2} مؤقتاً لأسباب فنية أو إدارية داخل الملعب.` : `⚠️ Sudden break: The clash between ${name1} and ${name2} has been temporarily put on hold.`;
+            } else {
+                statusBadgeLabel = currentLang === 'ar' ? "انتظرونا اليوم" : "PRE-MATCH";
+                commentaryText = currentLang === 'ar' ? `⏳ استعد للسهرة! ترقبوا التغطية الحصرية الشاملة قبل انطلاق صدام العمالقة بين ${name1} و ${name2}.` : `⏳ Get ready for the show! Stay tuned for our exclusive coverage before the clash of giants between ${name1} and ${name2}.`;
+            }
+
+            document.getElementById('storyMetaStatusText').innerText = statusBadgeLabel;
+            document.getElementById('storyCardTeam1Logo').src = logo1;
+            document.getElementById('storyCardTeam1Name').innerText = name1;
+            document.getElementById('storyCardTeam2Logo').src = logo2;
+            document.getElementById('storyCardTeam2Name').innerText = name2;
+            document.getElementById('storyCardLiveScore').innerText = `${score1} - ${score2}`;
+            document.getElementById('storyCardCommentary').innerText = commentaryText;
+
+            // إعداد زر التفاعل السفلي في الستوري لفتح البث المباشر المخصص
+            const footerArea = document.getElementById('storyActionFooterArea');
+            let isClickable = (state === 'in');
+            let btnLabelText = currentLang === 'ar' ? `شاهد البث المباشر الآن` : `Watch Live Stream`;
+            if (state === 'post') btnLabelText = currentLang === 'ar' ? `انتهت المباراة` : `Match Ended`;
+            if (state === 'pre') btnLabelText = currentLang === 'ar' ? `لم تبدأ بعد` : `Not Started`;
+
+            footerArea.innerHTML = `
+                <button class="btn-subscribe ${!isClickable ? 'disabled-match' : ''}" id="storyActionLiveBtn">
+                    <i data-lucide="play-circle"></i> ${btnLabelText}
+                </button>
+            `;
+            if(isClickable) {
+                document.getElementById('storyActionLiveBtn').onclick = () => {
+                    closeStoryViewer();
+                    openCustomPlayer(SERVERS_LIST[activeServerId]);
+                };
+            }
+            lucide.createIcons({ attrs: { 'data-lucide': true }, nameAttr: 'data-lucide', root: footerArea });
+
+            // إطلاق تايمر حركة تقدم الستوري الفردي والآلي للتقليب
+            currentProgressPercent = 0;
+            const intervalStep = 50; 
+            const activeFillBar = document.getElementById(`storyBarFill-${currentActiveStoryIndex}`);
+            
+            storyProgressTicker = setInterval(() => {
+                currentProgressPercent += (intervalStep / STORY_DURATION) * 100;
+                if (activeFillBar) activeFillBar.style.width = `${Math.min(currentProgressPercent, 100)}%`;
+            }, intervalStep);
+
+            storyPlaybackTimer = setTimeout(() => {
+                navigateStory(1); 
+            }, STORY_DURATION);
+        }
+
+        function navigateStory(direction) {
+            currentActiveStoryIndex += direction;
+            if (currentActiveStoryIndex >= globalRawEventsData.length) {
+                closeStoryViewer(); 
+            } else if (currentActiveStoryIndex < 0) {
+                currentActiveStoryIndex = 0;
+                renderCurrentActiveStoryCard();
+            } else {
+                renderCurrentActiveStoryCard();
+            }
+        }
+        /* ------------------------------------------------------------------ */
+
         async function loadEspnMatches() {
             const serverUrl = "https://site.api.espn.com/apis/site/v2/sports/soccer/all/scoreboard";
             try {
@@ -1693,6 +2173,10 @@
                 loading.style.display = 'none'; 
                 const events = data.events;
                 totalSlides = events.length;
+                globalRawEventsData = events; 
+
+                // بناء وتحديث شريط الستوريات
+                buildStoriesTrayUI();
 
                 const hasExistingSlides = wrapper.children.length === totalSlides;
                 matchesArrayData = [];
