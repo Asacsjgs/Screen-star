@@ -360,6 +360,17 @@
             -webkit-text-fill-color: transparent;
             margin-bottom: 10px;
         }
+        .story-match-time-value {
+            font-size: 16px;
+            font-weight: 800;
+            color: #FFCC00;
+            background: rgba(255, 204, 0, 0.08);
+            border: 1px solid rgba(255, 204, 0, 0.15);
+            padding: 6px 16px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            letter-spacing: 0.5px;
+        }
         .story-automated-commentary {
             font-size: 17px;
             font-weight: 800;
@@ -404,6 +415,11 @@
             .story-live-score-value {
                 font-size: 48px;
                 margin-bottom: 5px;
+            }
+            .story-match-time-value {
+                font-size: 13px;
+                padding: 4px 12px;
+                margin-bottom: 15px;
             }
             .story-automated-commentary {
                 font-size: 14px;
@@ -1353,6 +1369,7 @@
                         </div>
                     </div>
                     <div class="story-live-score-value" id="storyCardLiveScore">0 - 0</div>
+                    <div class="story-match-time-value" id="storyCardMatchTime">00:00</div>
                     <div class="story-automated-commentary" id="storyCardCommentary">جاري تحميل الأحداث...</div>
                 </div>
             </div>
@@ -1482,8 +1499,8 @@
         const STORY_DURATION = 5000; 
 
         const SERVERS_LIST = {
-            1: "https://bold-recipe-558c.plus10tv10.workers.dev/hd",
-            2: "https://bold-recipe-558c.plus10tv10.workers.dev/4k",
+            1: "https://1nyaler.streamhostingcdn.top/stream/23/index.m3u8",
+            2: "http://195.182.16.45:8080/live/omar777/01103978590/460872.ts",
             3: "https://pepsi3.abntv.live/hls/psp1.m3u8"
         };
         let activeServerId = 1;
@@ -1539,6 +1556,7 @@
                 alertEmptyReport: "يرجى كتابة تفاصيل المشكلة أولاً قبل الإرسال.",
                 alertErrorReport: "حدث خطأ أثناء الإرسال, يرجى المحاولة لاحقاً.",
                 remaining: "باقي: ", hours: "ساعة", minutes: "دقيقة", seconds: "ثانية",
+                matchTimeLabel: "توقيت انطلاق المباراة: ",
                 privacyHTML: `
                     <p>مرحباً بك في موقع <strong>نجم الشاشات</strong>. نحن نولي أقصى درجات الأهمية لخصوصية زوارنا ومستخدمينا. توضح هذه السياسة البيانات التي نجمعها وكيفية التعامل معها.</p>
                     <p><strong>1. جمع المعلومات:</strong> لا نقوم بجمع أي معلومات شخصية عنك إلا إذا قمت بتقديمها طواعية عبر نموذج "الإبلاغ عن مشكلة" (مثل الرسائل والاقتراحات لغرض تحسين الخدمة).</p>
@@ -1586,6 +1604,7 @@
                 alertEmptyReport: "Please write the issue details before submitting.",
                 alertErrorReport: "An error occurred, please try again later.",
                 remaining: "Starts in: ", hours: "h", minutes: "m", seconds: "s",
+                matchTimeLabel: "Match Kickoff Time: ",
                 privacyHTML: `
                     <p>Welcome to <strong>Screen Star</strong>. We place the highest priority on the privacy of our visitors. This policy outlines the types of data we collect and how it is managed.</p>
                     <p><strong>1. Information Collection:</strong> We do not collect personal identifying information unless voluntarily submitted via the "Report an Issue" form to enhance website functionality.</p>
@@ -2116,6 +2135,12 @@
             document.getElementById('storyCardTeam2Logo').src = logo2;
             document.getElementById('storyCardTeam2Name').innerText = name2;
             document.getElementById('storyCardLiveScore').innerText = `${score1} - ${score2}`;
+            
+            // حقن وقت وتاريخ انطلاق المباراة المترجم داخل بطاقة الستوري
+            const matchTimeFormatted = getLocalizedTime(event.date);
+            const matchDayFormatted = getLocalizedDay(event.date);
+            document.getElementById('storyCardMatchTime').innerText = `${translations[currentLang].matchTimeLabel} ${matchDayFormatted} - ${matchTimeFormatted}`;
+            
             document.getElementById('storyCardCommentary').innerText = commentaryText;
 
             const footerArea = document.getElementById('storyActionFooterArea');
