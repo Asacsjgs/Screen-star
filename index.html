@@ -1741,9 +1741,8 @@
             if (foundIndex !== -1) { showSlide(foundIndex); }
         }
 
-        function handleMatchButtonClick(state, eventId) {
-            // التحقق إذا كان الزر مفعلاً (سواء كانت المباراة بدأت أو قبلها بـ 25 دقيقة)
-            if (state === "in" || state === "live" || state === "ready_to_watch") {
+        function handleMatchButtonClick(state) {
+            if (state === "in" || state === "live") {
                 openCustomPlayer(SERVERS_LIST[activeServerId]);
             } else if (state === "suspended") {
                 alert(translations[currentLang].alertSuspended);
@@ -1975,22 +1974,14 @@
             return new Date(utcString).toLocaleDateString(currentLang === 'ar' ? 'ar-EG' : 'en-US', { timeZone: 'Asia/Riyadh', month: 'short', day: 'numeric' });
         }
 
-        function setupLiveCountdown(utcString, elementId, eventId, btnElement) {
+        function setupLiveCountdown(utcString, elementId) {
             function update() {
                 const el = document.getElementById(elementId);
-                const diff = new Date(utcString) - new Date();
-                
-                // التعديل هنا: إذا كان الفرق 25 دقيقة أو أقل (25 * 60 * 1000)
-                if (diff <= 25 * 60 * 1000 && diff > -90 * 60 * 1000) {
-                    if (el) el.innerHTML = "";
-                    // تفعيل الزر
-                    btnElement.classList.remove('disabled-match');
-                    btnElement.onclick = function() { handleMatchButtonClick('ready_to_watch', eventId); };
-                    return;
-                }
+                if (!el) return;
 
+                const diff = new Date(utcString) - new Date();
                 if (diff <= 0) {
-                    if (el) el.innerHTML = "";
+                    el.innerHTML = "";
                     return;
                 }
 
@@ -2003,7 +1994,7 @@
                 if (mins > 0 || hrs > 0) text += `${mins}${translations[currentLang].minutes} `;
                 text += `${secs}${translations[currentLang].seconds}`;
 
-                if (el) el.innerHTML = `<div class="countdown-box">${text}</div>`;
+                el.innerHTML = `<div class="countdown-box">${text}</div>`;
             }
             update();
             const interval = setInterval(update, 1000);
@@ -2145,6 +2136,7 @@
             document.getElementById('storyCardTeam2Name').innerText = name2;
             document.getElementById('storyCardLiveScore').innerText = `${score1} - ${score2}`;
             
+            // حقن وقت وتاريخ انطلاق المباراة المترجم داخل بطاقة الستوري
             const matchTimeFormatted = getLocalizedTime(event.date);
             const matchDayFormatted = getLocalizedDay(event.date);
             document.getElementById('storyCardMatchTime').innerText = `${translations[currentLang].matchTimeLabel} ${matchDayFormatted} - ${matchTimeFormatted}`;
@@ -2314,7 +2306,7 @@
                         btnEl.className = `btn-subscribe ${customButtonClass}`;
                         btnEl.innerText = buttonDynamicText;
                         
-                        btnEl.onclick = function() { handleMatchButtonClick(state, eventId); };
+                        btnEl.onclick = function() { handleMatchButtonClick(state); };
                         
                         const countBox = existingSlide.querySelector('.badge-container div[id^="count-box-"]');
                         if (countBox) countBox.id = countdownContainerId;
@@ -2347,13 +2339,12 @@
                                 <button class="btn-subscribe ${customButtonClass}">${buttonDynamicText}</button>
                             </div>
                         `;
-                        const btn = slideDiv.querySelector('.btn-subscribe');
-                        btn.onclick = function() { handleMatchButtonClick(state, eventId); };
+                        slideDiv.querySelector('.btn-subscribe').onclick = function() { handleMatchButtonClick(state); };
                         wrapper.appendChild(slideDiv);
+                    }
 
-                        if (isUpcoming) {
-                            setupLiveCountdown(event.date, countdownContainerId, eventId, btn);
-                        }
+                    if (isUpcoming) {
+                        setupLiveCountdown(event.date, countdownContainerId);
                     }
                 });
 
@@ -2382,5 +2373,14 @@
         lucide.createIcons();
         setInterval(loadEspnMatches, 45000); 
  </script>
+ <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal) {
+    await OneSignal.init({
+      appId: "a289642b-bf58-4951-8015-b48dc953b05e",
+    });
+  });
+</script>
 </body>
 </html>
