@@ -607,6 +607,27 @@
             font-weight: 800;
         }
 
+        .search-clear-btn {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--glass-border);
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .search-clear-btn:hover {
+            background: rgba(239, 68, 68, 0.15);
+            border-color: #EF4444;
+            color: #EF4444;
+            transform: scale(1.05);
+        }
+
         .hero-slider {
             position: relative;
             width: 100%;
@@ -1411,7 +1432,9 @@
     <div class="search-bar-container" id="searchBarBox">
         <i data-lucide="search" style="color: #FFCC00; width: 20px;"></i>
         <input type="text" class="search-input" id="matchSearchInput" placeholder="ابحث عن اسم فريق أو منتخب..." oninput="executeMatchSearch()">
-        <i data-lucide="x" style="color: var(--text-muted); cursor: pointer; width: 18px;" onclick="toggleSearchBar()"></i>
+        <button class="search-clear-btn" onclick="clearSearchInputAndHide()" title="مسح وإغلاق">
+            <i data-lucide="x" style="width: 18px; height: 18px;"></i>
+        </button>
     </div>
 
     <div class="player-modal" id="customPlayerModal">
@@ -1728,7 +1751,21 @@
             const inputField = document.getElementById('matchSearchInput');
             searchBox.classList.toggle('show');
             triggerBtn.classList.toggle('active');
-            if(searchBox.classList.contains('show')) { inputField.focus(); } else { inputField.value = ''; }
+            if(searchBox.classList.contains('show')) { 
+                inputField.focus(); 
+            } else { 
+                inputField.value = ''; 
+            }
+        }
+
+        function clearSearchInputAndHide() {
+            const inputField = document.getElementById('matchSearchInput');
+            if (inputField.value !== '') {
+                inputField.value = '';
+                // إعادة عرض السلايدات كاملة إذا رغبت، أو تترك التوجيه الافتراضي
+            } else {
+                toggleSearchBar();
+            }
         }
 
         function executeMatchSearch() {
@@ -2039,7 +2076,13 @@
                 const comp = event.competitions[0];
                 const t1 = comp.competitors[0];
                 const t2 = comp.competitors[1];
-                const state = event.status.type.state;
+                let state = event.status.type.state;
+
+                // فحص تفعيل البث قبل المباراة بـ 25 دقيقة للقصص أيضاً
+                const timeDiffMinutes = (new Date(event.date) - new Date()) / (1000 * 60);
+                if (state === 'pre' && timeDiffMinutes <= 25) {
+                    state = 'in';
+                }
 
                 const name1 = currentLang === 'ar' ? translateTeamName(t1.team.displayName) : t1.team.displayName;
                 const logo1 = t1.team.logo || 'https://a.espncdn.com/i/teamlogos/soccer/500/default-soccer.png';
@@ -2081,7 +2124,13 @@
             const comp = event.competitions[0];
             const t1 = comp.competitors[0];
             const t2 = comp.competitors[1];
-            const state = event.status.type.state;
+            let state = event.status.type.state;
+
+            // فحص تفعيل البث قبل المباراة بـ 25 دقيقة
+            const timeDiffMinutes = (new Date(event.date) - new Date()) / (1000 * 60);
+            if (state === 'pre' && timeDiffMinutes <= 25) {
+                state = 'in';
+            }
 
             const name1 = currentLang === 'ar' ? translateTeamName(t1.team.displayName) : t1.team.displayName;
             const name2 = currentLang === 'ar' ? translateTeamName(t2.team.displayName) : t2.team.displayName;
@@ -2136,7 +2185,6 @@
             document.getElementById('storyCardTeam2Name').innerText = name2;
             document.getElementById('storyCardLiveScore').innerText = `${score1} - ${score2}`;
             
-            // حقن وقت وتاريخ انطلاق المباراة المترجم داخل بطاقة الستوري
             const matchTimeFormatted = getLocalizedTime(event.date);
             const matchDayFormatted = getLocalizedDay(event.date);
             document.getElementById('storyCardMatchTime').innerText = `${translations[currentLang].matchTimeLabel} ${matchDayFormatted} - ${matchTimeFormatted}`;
@@ -2232,6 +2280,12 @@
 
                     let state = event.status.type.state; 
                     const detailState = event.status.type.name; 
+
+                    // حساب الفارق الزمني لتشغيل البث قبل المباراة بـ 25 دقيقة
+                    const timeDiffMinutes = (new Date(event.date) - new Date()) / (1000 * 60);
+                    if (state === "pre" && timeDiffMinutes <= 25) {
+                        state = "in";
+                    }
                     
                     if (state === "in" && (detailState === "STATUS_SUSPENDED" || detailState === "STATUS_DELAYED" || event.status.type.description === "Suspended" || event.status.type.description === "Delayed")) {
                         state = "suspended";
@@ -2373,14 +2427,5 @@
         lucide.createIcons();
         setInterval(loadEspnMatches, 45000); 
  </script>
- <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-<script>
-  window.OneSignalDeferred = window.OneSignalDeferred || [];
-  OneSignalDeferred.push(async function(OneSignal) {
-    await OneSignal.init({
-      appId: "a289642b-bf58-4951-8015-b48dc953b05e",
-    });
-  });
-</script>
 </body>
 </html>
