@@ -13,6 +13,11 @@
     <meta name="keywords" content="نجم الشاشات, بث مباشر للمباريات, مباريات اليوم بث مباشر, livehd7, الاسطورة لبث المباريات, بث مباشر بدون تقطيع, يلا شوت, كورة لايف, جدول مباريات اليوم">
     <meta name="robots" content="index, follow">
     
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="نجم الشاشات">
+    <link rel="apple-touch-icon" href="https://i.ibb.co/bgD3t1SL/Picsart-26-06-27-13-42-39-009.webp">
+
     <meta property="og:type" content="website">
     <meta property="og:title" content="نجم الشاشات | بث مباشر للمباريات اليوم بدون تقطيع وبجودة HD">
     <meta property="og:description" content="موقع نجم الشاشات يقدم بث مباشر للمباريات اليوم بدون تقطيع وبجودة عالية HD. تابع جدول مباريات اليوم وأهم البطولات العربية والعالمية.">
@@ -510,6 +515,16 @@
         .lang-btn {
             border: 1px solid #FFCC00;
             background: rgba(255, 204, 0, 0.05);
+        }
+
+        /* تنسيق زر تثبيت التطبيق المخصص */
+        .install-btn-style {
+            background: var(--accent-linear) !important;
+            color: #0b0f19 !important;
+            border: none !important;
+        }
+        .install-btn-style i {
+            color: #0b0f19 !important;
         }
 
         .menu-footer {
@@ -1316,6 +1331,11 @@
         </div>
         
         <div class="menu-links">
+            <div id="pwaInstallMenuItem" class="menu-item install-btn-style" style="display: none;">
+                <i data-lucide="download"></i>
+                <span id="lnkInstallApp">تثبيت التطبيق على الهاتف</span>
+            </div>
+
             <div class="menu-item lang-btn" onclick="switchLanguage()">
                 <i data-lucide="languages"></i>
                 <span id="langBtnText">English</span>
@@ -1552,6 +1572,7 @@
                 lnkPlayer: "تحميل مشغل القنوات",
                 lnkPrivacy: "سياسة الخصوصية",
                 lnkReport: "الإبلاغ عن مشكلة",
+                lnkInstallApp: "تثبيت التطبيق على الهاتف",
                 modalReportTitle: "بلاغ عن مشكلة في الموقع",
                 reportDescText: "يسعدنا تلقي ملاحظاتك لحل أي مشكلة تواجهها فوراً.",
                 reportPlaceholder: "اكتب تفاصيل المشكلة أو الخلل الذي يواجهك هنا...",
@@ -1600,6 +1621,7 @@
                 lnkPlayer: "Download Channels Player",
                 lnkPrivacy: "Privacy Policy",
                 lnkReport: "Report an Issue",
+                lnkInstallApp: "Install App on Phone",
                 modalReportTitle: "Report a Website Issue",
                 reportDescText: "We are glad to receive your feedback to resolve any bugs immediately.",
                 reportPlaceholder: "Write the details of the bug or problem you face here...",
@@ -1669,6 +1691,7 @@
             document.getElementById('lnkPlayer').innerText = translations[currentLang].lnkPlayer;
             document.getElementById('lnkPrivacy').innerText = translations[currentLang].lnkPrivacy;
             document.getElementById('lnkReport').innerText = translations[currentLang].lnkReport;
+            document.getElementById('lnkInstallApp').innerText = translations[currentLang].lnkInstallApp;
             document.getElementById('modalReportTitle').innerText = translations[currentLang].modalReportTitle;
             document.getElementById('reportDescText').innerText = translations[currentLang].reportDescText;
             document.getElementById('reportIssueMessage').placeholder = translations[currentLang].reportPlaceholder;
@@ -2111,6 +2134,7 @@
         }
 
         function closeStoryViewer() {
+            document.getElementById('storyViewerModal').classList.remove('remove'); // تصحيح بسيط للثبات الهيكلي
             document.getElementById('storyViewerModal').classList.remove('open');
             clearTimeout(storyPlaybackTimer);
             clearInterval(storyProgressTicker);
@@ -2421,6 +2445,108 @@
         }
 
         function moveSlide(direction) { showSlide(currentSlide + direction); }
+
+        // ------------------------------------------------------------------ 
+        // كود إدارة وتوليد الـ PWA والتثبيت الذاتي على أجهزة الهاتف (أندرويد وآيفون)
+        // ------------------------------------------------------------------ 
+        let deferredPrompt;
+
+        function initPwaInfrastructure() {
+            // 1. توليد وإدراج ملف الـ Manifest برمجياً وديناميكياً لتفادي الاعتماد على ملفات خارجية
+            const manifestObj = {
+                "name": "نجم الشاشات بث مباشر",
+                "short_name": "نجم الشاشات",
+                "description": "بث مباشر للمباريات اليوم بدون تقطيع وبجودة HD",
+                "start_url": window.location.href,
+                "display": "standalone",
+                "background_color": "#0b0f19",
+                "theme_color": "#0b0f19",
+                "orientation": "portrait-primary",
+                "icons": [
+                    {
+                        "src": "https://i.ibb.co/bgD3t1SL/Picsart-26-06-27-13-42-39-009.webp",
+                        "sizes": "192x192",
+                        "type": "image/webp"
+                    },
+                    {
+                        "src": "https://i.ibb.co/bgD3t1SL/Picsart-26-06-27-13-42-39-009.webp",
+                        "sizes": "512x512",
+                        "type": "image/webp"
+                    }
+                ]
+            };
+            const stringManifest = JSON.stringify(manifestObj);
+            const blobData = new Blob([stringManifest], {type: 'application/json'});
+            const manifestURL = URL.createObjectURL(blobData);
+            const manifestLinkTag = document.createElement('link');
+            manifestLinkTag.rel = 'manifest';
+            manifestLinkTag.href = manifestURL;
+            document.head.appendChild(manifestLinkTag);
+
+            // 2. تسجيل الـ Service Worker لمتطلبات التثبيت بدون خوادم إضافية
+            if ('serviceWorker' in navigator) {
+                const swCode = `
+                    self.addEventListener('install', (e) => { self.skipWaiting(); });
+                    self.addEventListener('activate', (e) => { e.waitUntil(self.clients.claim()); });
+                    self.addEventListener('fetch', (e) => { e.respondWith(fetch(e.request).catch(() => caches.match(e.request))); });
+                `;
+                const swBlob = new Blob([swCode], {type: 'application/javascript'});
+                const swURL = URL.createObjectURL(swBlob);
+                navigator.serviceWorker.register(swURL).catch(err => console.log("SW Register Error", err));
+            }
+
+            // 3. التقاط حدث التثبيت لعرض الزر المخصص داخل القائمة الجانبية لهواتف الأندرويد
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                const installItem = document.getElementById('pwaInstallMenuItem');
+                if (installItem) {
+                    installItem.style.display = 'flex';
+                    lucide.createIcons();
+                }
+            });
+
+            // تنفيذ إجراء التثبيت الفعلي عند النقر على الزر
+            const installBtn = document.getElementById('pwaInstallMenuItem');
+            if (installBtn) {
+                installBtn.addEventListener('click', async () => {
+                    if (deferredPrompt) {
+                        toggleSideMenu();
+                        deferredPrompt.prompt();
+                        const { outcome } = await deferredPrompt.userChoice;
+                        if (outcome === 'accepted') {
+                            document.getElementById('pwaInstallMenuItem').style.display = 'none';
+                        }
+                        deferredPrompt = null;
+                    } else {
+                        // في حال كان الهاتف يعمل بنظام iOS (آيفون)، يتم إرشاد المستخدم لكيفية التثبيت اليدوي
+                        alert(currentLang === 'ar' ? 
+                            "لتثبيت التطبيق على الآيفون:\n1. اضغط على زر 'مشاركة' (Share) بأسفل المتصفح.\n2. اختر 'إضافة إلى الشاشة الرئيسية' (Add to Home Screen)." : 
+                            "To install on iPhone:\n1. Tap the 'Share' button in Safari.\n2. Select 'Add to Home Screen'.");
+                    }
+                });
+            }
+
+            // إخفاء الزر تلقائياً في حال كان التطبيق مثبتاً بالفعل ويعمل من الشاشة الرئيسية
+            window.addEventListener('appinstalled', () => {
+                const installItem = document.getElementById('pwaInstallMenuItem');
+                if (installItem) installItem.style.display = 'none';
+                deferredPrompt = null;
+            });
+            
+            // التحقق إذا كان المستخدم يدخل من نظام آيفون لعرض زر الإرشاد دائماً داخل القائمة
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+            if (isIOS && !isStandalone) {
+                const installItem = document.getElementById('pwaInstallMenuItem');
+                if (installItem) installItem.style.display = 'flex';
+            }
+        }
+
+        // تشغيل البنية التحتية للتثبيت فور تحميل الصفحة بشكل متكامل
+        document.addEventListener('DOMContentLoaded', () => {
+            initPwaInfrastructure();
+        });
 
         updatePrivacyText();
         loadEspnMatches();
